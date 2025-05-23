@@ -1,0 +1,566 @@
+---
+title: "Time to Jump"
+date: "March 2025"
+output: 
+  html_document:
+    code_folding: hide
+    toc: TRUE
+    toc_depth: 2
+    toc_float: true
+---
+
+```{r setup, include = F}
+#Load libraries
+library(flextable)
+library(tidyr)
+library(dplyr)
+library(afex)
+library(parameters)
+library(effectsize)
+library(rempsyc)
+library(BayesFactor)
+
+#Set paths 
+path_to_behav = "your_path/simulators/data/"
+path_to_bf_data = "your_path/simulators/estimates_param_estim/estimates_ttj_presimulation_250ep_10000it/"
+
+#Functions
+fill_df = function(param, df_original) {
+  model = lm(as.formula(paste(param, "~ condition")), data = df_original)
+  anova_res = parameters::model_parameters(anova(model))
+  F_value = anova_res$F[1]
+  p_value = anova_res$p[1]
+  eta_sq = effectsize::eta_squared(model, partial = FALSE)$Eta2
+  data.frame(parameter = param, F = F_value, p = p_value, eta_squared = eta_sq)
+}
+
+fill_df_Bayesian = function(param, df) {
+  df$condition = as.factor(df$condition)
+
+  bf_anova = BayesFactor::anovaBF(as.formula(paste(param, "~ condition")), data = df)
+  bf_df = as.data.frame(bf_anova)
+  bf_value_global = bf_df$bf[1]
+
+  acc_expl_bf = as.data.frame(BayesFactor::ttestBF(
+    x = df[df$condition == "acc", param],
+    y = df[df$condition == "explicitDeadline", param]
+  ))$bf
+  acc_impl_bf = as.data.frame(BayesFactor::ttestBF(
+    x = df[df$condition == "acc", param],
+    y = df[df$condition == "implicitDeadline", param]
+  ))$bf
+  impl_expl_bf = as.data.frame(BayesFactor::ttestBF(
+    x = df[df$condition == "implicitDeadline", param],
+    y = df[df$condition == "explicitDeadline", param]
+  ))$bf
+  data.frame(
+    params = param,
+    BF_global = bf_value_global,
+    BF_acc_vs_expl = acc_expl_bf,
+    BF_acc_vs_impl = acc_impl_bf,
+    BF_impl_vs_expl = impl_expl_bf
+  )
+}
+
+format_BF = function(x) {
+  if (is.na(x)) {
+    return(NA_character_) 
+  }
+  if (x >= 1000 | x < 0.01) {
+    #Scientific notation with 2 digits
+    return(formatC(x, format = "e", digits = 2))
+  } else {
+    #Normal number with 2 digits
+    return(formatC(x, format = "f", digits = 2))
+  }
+}
+```
+
+```{r load_data, include=F}
+#Load behav
+file_name = paste0(path_to_behav, "ttj_result_empirical_osy.csv")
+behav = read.csv(file_name)
+behav = behav %>%
+  dplyr::rename(
+    pp_nr = pp,
+    condition = cond,
+    acc_true = accuracy,
+    meanRT_true_correct = meanRT_correct,
+    meanRT_true_incorrect = meanRT_incorrect,
+    timeout_true = timeout,
+    skew_correct_rt = skew_correct
+  )
+behav = behav %>% dplyr::mutate(across(c("pp_nr", "condition"), factor))
+
+#Load param
+prior_contexts = c("levy", "ddm")
+simulator_contexts = c("no_deadline", "deadline")
+bf_estimates = NULL
+for (p in prior_contexts) {
+  for (s in simulator_contexts) {
+    estimates_path = sprintf("%sestimates_net1_%s_%s.csv", path_to_bf_data, p, s)
+    df = read.csv(estimates_path)
+    df$prior = p
+    df$simulator = s
+    bf_estimates = rbind(bf_estimates, df)
+  }
+}
+#bf_estimates$model = ifelse(bf_estimates$prior=="levy", "Lévy-flight model", "Diffusion model")
+bf_estimates$v_both = (bf_estimates$v1 + c(bf_estimates$v0*-1))/2
+bf_estimates$v0 = bf_estimates$v0*-1
+bf_estimates$condition = factor(bf_estimates$condition, levels=c("acc", "implicitDeadline", "explicitDeadline"), ordered = T)
+```
+
+# Behavioral Variables 
+## Mixed ANOVA
+
+```{r mixed, include=T, warning=F, message=F}
+behav_long = behav %>% dplyr::select(pp_nr, condition, meanRT_true_correct, meanRT_true_incorrect) %>%
+  tidyr::pivot_longer(
+    cols = c(meanRT_true_correct, meanRT_true_incorrect),
+    names_to = "correctness",
+    values_to = "rt",
+    names_prefix = "meanRT_true_"
+  )
+behav_long$correctness = factor(behav_long$correctness, levels=c("correct", "incorrect"), ordered=T)
+
+afex::aov_ez("pp_nr", "rt", behav_long, between = "condition", within = "correctness", detailed = TRUE)
+
+bf = BayesFactor::anovaBF(
+  rt ~ condition * correctness + pp_nr,
+  data = behav_long,
+  whichRandom = "pp_nr", 
+  whichModels = "withmain",  
+  iterations = 10000 #100000
+)
+bf
+bf_table = extractBF(bf, onlybf = TRUE)
+cat("Interaction BF (bf[4]/bf[3]): ", bf_table[4] / bf_table[3])
+```
+
+## Simple Effects
+
+``` {r mixed_groupwise, include=T, warning=F, message=F}
+df_sub = behav_long %>% filter(condition == "acc") %>% as.data.frame()
+se_acc = rempsyc::nice_t_test(data = df_sub, group = "correctness", response = "rt", paired = TRUE)
+se_acc_bf = BayesFactor::ttestBF(
+  x = df_sub[df_sub$correctness == "correct", "rt"],
+  y = df_sub[df_sub$correctness == "incorrect", "rt"],
+  paired = TRUE
+)
+df_sub = behav_long %>% filter(condition == "implicitDeadline") %>% as.data.frame()
+se_impl = rempsyc::nice_t_test(data = df_sub, group = "correctness", response = "rt", paired = TRUE)
+se_impl_bf = BayesFactor::ttestBF(
+    x = df_sub[df_sub$correctness == "correct", "rt"],
+    y = df_sub[df_sub$correctness == "incorrect", "rt"],
+    paired = TRUE
+  )
+df_sub = behav_long %>% filter(condition == "explicitDeadline") %>% as.data.frame()
+se_expl = rempsyc::nice_t_test(data = df_sub, group = "correctness", response = "rt", paired = TRUE)
+se_expl_bf = BayesFactor::ttestBF(
+    x = df_sub[df_sub$correctness == "correct", "rt"],
+    y = df_sub[df_sub$correctness == "incorrect", "rt"],
+    paired = TRUE
+  )
+
+cat("--- Accuracy condition ---")
+se_acc
+se_acc_bf
+cat("--- Implicit deadline condition ---")
+se_impl
+se_impl_bf
+cat("--- Explicit deadline condition ---")
+se_expl
+se_expl_bf
+
+p_vals = c(se_acc$p, se_impl$p, se_expl$p)
+p_vals_corrected = p.adjust(p_vals, method = "holm")
+cat("Adjusted p-values: ", round(p_vals_corrected, 4))
+```
+
+## Differences Between Groups
+
+```{r t_test_timeout, include=T, warning=F, message=F}
+#Exceedance feedback rate 
+behav_impl_expl = behav[which(behav$condition!="acc"), ]
+behav_impl_expl$condition = as.character(behav_impl_expl$condition)
+stats::t.test(
+  timeout_true ~ condition,
+  data = behav_impl_expl,
+  subset = condition %in% c("explicitDeadline", "implicitDeadline"),
+  var.equal = TRUE  
+)
+BayesFactor::ttestBF(
+  formula = timeout_true ~ condition,
+  data = behav_impl_expl,
+  subset = condition %in% c("explicitDeadline", "implicitDeadline")
+)
+```
+
+```{r behav_ANOVA, include=T, warning=F, message=F}
+behav_params = c("meanRT_true_correct", "meanRT_true_incorrect", "acc_true", "skew_correct_rt")
+behav_df = do.call(rbind, lapply(behav_params, fill_df, df_original = behav))
+
+behav_df_formatted = behav_df %>%
+  dplyr::mutate(signif = case_when(
+    p < .001 ~ "***",
+    p < .01 ~ "**",
+    p < .05 ~ "*",
+    p < .10 ~ "+",
+    TRUE ~ ""
+  )) %>%
+  dplyr::mutate(F = paste0(format(round(F, 2), nsmall = 2), signif),
+         eta_squared = format(round(eta_squared, 2), nsmall = 2)) %>%
+  dplyr::select(parameter, F, eta_squared)
+
+behav_df_bf = do.call(rbind, lapply(behav_params, fill_df_Bayesian, df = behav))
+bf_cols = colnames(behav_df_bf)[2:5]
+behav_df_bf[bf_cols] = lapply(behav_df_bf[bf_cols], function(col) sapply(col, format_BF))
+
+behav_df_formatted["BF10"] = behav_df_bf$BF_global
+
+behav_table_ft = flextable(behav_df_formatted)
+behav_table_ft = set_header_labels(behav_table_ft,
+                                    parameter = "Variable",
+                                    F = "F",
+                                    eta_squared = "η²") 
+behav_table_ft
+```
+
+```{r behav_pairwisee, include=T, warning=F, message=F}
+behav$condition = factor(behav$condition, ordered = TRUE, levels = c("acc", "implicitDeadline", "explicitDeadline"))
+behav_contrasts_df = rempsyc::nice_contrasts(response = behav_params, group = "condition", data = behav) %>%
+  dplyr::mutate(
+    p = p.adjust(p, method = "holm"),
+    parameter = `Dependent Variable`
+  )
+behav_contrasts_wide = behav_contrasts_df %>%
+  dplyr::mutate(
+    across(c(t, d), round, 2),
+    sig = case_when(
+      p < .001 ~ "***",
+      p < .01 ~ "**",
+      p < .05 ~ "*",
+      p < .10 ~ "+",
+      TRUE ~ ""
+    ),
+    t = paste0(format(t, nsmall = 2), sig),
+    d = format(d, nsmall = 2)
+  ) %>%
+  dplyr::select(parameter, Comparison, t, d) %>%
+  tidyr::pivot_wider(names_from = parameter, values_from = c(t, d))
+
+behav_df_bf_t = behav_df_bf %>%
+  tibble::column_to_rownames("params") %>%
+  dplyr::select(-BF_global) %>%
+  t() %>%
+  as.data.frame()
+behav_df_bf_t$Comparison = rownames(behav_df_bf_t)
+behav_df_bf_t = behav_df_bf_t[, c("Comparison", setdiff(names(behav_df_bf_t), "Comparison"))] %>%
+  dplyr::mutate(Comparison = dplyr::recode(Comparison,
+    "BF_acc_vs_expl" = "Accuracy vs. explicit deadline",
+    "BF_acc_vs_impl" = "Accuracy vs. implicit deadline",
+    "BF_impl_vs_expl" = "Implicit vs. explicit deadline"
+  ))
+
+colnames(behav_df_bf_t)[2:5] = paste0("BF_", colnames(behav_df_bf_t)[2:5])
+
+behav_contrasts_wide = behav_contrasts_wide %>%
+  dplyr::mutate(Comparison = dplyr::recode(Comparison,
+    "acc - explicitDeadline" = "Accuracy vs. explicit deadline",
+    "acc - implicitDeadline" = "Accuracy vs. implicit deadline",
+    "implicitDeadline - explicitDeadline" = "Implicit vs. explicit deadline"
+  )) %>%
+  as.data.frame()
+behav_merge = merge(behav_contrasts_wide, behav_df_bf_t)
+
+cols_order = c("Comparison", unlist(lapply(behav_params, function(param) c(paste0("t_", param), paste0("d_", param), paste0("BF_", param)))))
+behav_merge = behav_merge[, cols_order]
+
+behav_ft = flextable::flextable(behav_merge) %>%
+  flextable::set_header_labels(values = setNames(c("Contrast", rep(c("t", "d", "BF10"), length(behav_params))), names(behav_merge))) %>%
+  add_header_row(values = c("", "Mean RT correct", "Mean RT incorrect", "Accuracy rate", "Skew correct"), colwidths = c(1, rep(3, length(behav_params)))) %>%
+  italic(italic = TRUE, i = 2, j = grep("^(t|d)$", names(behav_merge)), part = "header") %>%
+  align(align = "left", part = "all", j = 1) %>%
+  align(align = "center", part = "all", j = 2:ncol(behav_merge)) %>%
+  fontsize(size = 7, part = "all")
+
+behav_ft
+```
+
+# Parameter Estimates
+
+```{r prep_BayesFlow_data, include=F}
+params = c("alpha", "a", "zr", "v0", "v1", "t0", "st0")
+
+lfm_nodeadline = bf_estimates[which(bf_estimates$simulator=="no_deadline" & bf_estimates$prior=="levy"), ]
+lfm_nodeadline_comp = lfm_nodeadline[which(lfm_nodeadline$condition=="explicitDeadline"), ]
+lfm_deadline = bf_estimates[which(bf_estimates$simulator=="deadline" &
+                                    bf_estimates$prior=="levy"), ]
+#lfm_nodeadline$alpha = asin(lfm_nodeadline$alpha/2) 
+#lfm_deadline$alpha = asin(lfm_deadline$alpha/2) 
+
+ddm_nodeadline = bf_estimates[which(bf_estimates$simulator=="no_deadline" & bf_estimates$prior=="ddm"), ]
+ddm_deadline = bf_estimates[which(bf_estimates$simulator=="deadline" & bf_estimates$prior=="ddm"), ]
+ddm_nodeadline_comp = ddm_nodeadline[which(ddm_nodeadline$condition=="explicitDeadline"), ]
+
+comp_lfm_nodeadline = rempsyc::nice_contrasts(
+  response = params,
+  group = "condition",
+  data = lfm_nodeadline
+)
+comp_lfm_nodeadline$p = p.adjust(comp_lfm_nodeadline$p, method = "holm")
+comp_lfm_nodeadline$model = "levy"
+
+comp_ddm_nodeadline = rempsyc::nice_contrasts(
+  response = params,
+  group = "condition",
+  data = ddm_nodeadline
+)
+comp_ddm_nodeadline$p = p.adjust(comp_ddm_nodeadline$p, method = "holm")
+comp_ddm_nodeadline$model = "ddm"
+
+lfm_nodeadline_c = lfm_nodeadline[which(lfm_nodeadline$condition=="explicitDeadline"), ]
+all_deadline = rbind(lfm_nodeadline_c, lfm_deadline)
+all_deadline$simulator = factor(all_deadline$simulator, levels=c("no_deadline", "deadline"), ordered = T)
+comp_simulators_levy = rempsyc::nice_t_test(data = all_deadline, group="simulator", response = params, paired=T, var.equal = TRUE)
+comp_simulators_levy$model = "levy"
+bf_results = lapply(params, function(param) {
+  BayesFactor::ttestBF(
+    x = all_deadline[all_deadline$simulator == "no_deadline", param],
+    y = all_deadline[all_deadline$simulator == "deadline", param],
+    paired = TRUE
+  )
+})
+bf_table_lfm = data.frame(
+  parameter = params,
+  BF = sapply(bf_results, function(bf) as.data.frame(bf)$bf)
+)
+
+ddm_nodeadline_c = ddm_nodeadline[which(ddm_nodeadline$condition=="explicitDeadline"), ]
+all_deadline = rbind(ddm_nodeadline_c, ddm_deadline)
+comp_simulators_ddm = rempsyc::nice_t_test(data = all_deadline, group="simulator", response = params, paired=T, var.equal = TRUE)
+comp_simulators_ddm$model = "ddm"
+bf_results = lapply(params, function(param) {
+  BayesFactor::ttestBF(
+    x = all_deadline[all_deadline$simulator == "no_deadline", param],
+    y = all_deadline[all_deadline$simulator == "deadline", param],
+    paired = TRUE
+  )
+})
+bf_table_ddm = data.frame(
+  parameter = params,
+  BF = sapply(bf_results, function(bf) as.data.frame(bf)$bf)
+)
+
+bf_table_lfm$model="levy"
+bf_table_ddm$model="ddm"
+bf_table_sim = rbind(bf_table_lfm, bf_table_ddm)
+bf_table_sim$BF = sapply(bf_table_sim$BF, format_BF)
+bf_table_sim$Comparison = "Explicit deadline: main vs. additional"
+
+comp_simulators = rbind(comp_simulators_ddm, comp_simulators_levy)
+comp_simulators$Comparison = "Explicit deadline: main vs. additional"
+comp_simulators[, c("t", "d")] = comp_simulators[, c("t", "d")]*-1
+
+my_comp_nodeadline = rbind(comp_ddm_nodeadline, comp_lfm_nodeadline)
+my_compi = merge(my_comp_nodeadline, comp_simulators, all = T)
+names(my_compi)[names(my_compi) == "Dependent Variable"] = "param"
+
+
+#LFM
+param_df_lfm = do.call(rbind, lapply(params, fill_df, df_original = lfm_nodeadline))
+param_df_lfm_formatted = param_df_lfm %>%
+  dplyr::mutate(signif = case_when(
+    p < .001 ~ "***",
+    p < .01 ~ "**",
+    p < .05 ~ "*",
+    p < .10 ~ "+",
+    TRUE ~ ""
+  )) %>%
+  dplyr::mutate(F = paste0(format(round(F, 2), nsmall = 2), signif),
+         eta_squared = format(round(eta_squared, 2), nsmall = 2)) %>%
+  dplyr::select(parameter, F, eta_squared)
+param_df_lfm_formatted$model = "lfm"
+param_df_lfm_bf = do.call(rbind, lapply(params, fill_df_Bayesian, df = lfm_nodeadline))
+
+bf_cols = colnames(param_df_lfm_bf)[2:5]
+param_df_lfm_bf[bf_cols] = lapply(param_df_lfm_bf[bf_cols], function(col) sapply(col, format_BF))
+global_bf = param_df_lfm_bf$BF_global
+F_df_lfm = cbind(param_df_lfm_formatted, global_bf)
+
+#DDM
+param_df_ddm = do.call(rbind, lapply(params, fill_df, df_original = ddm_nodeadline))
+param_df_ddm_formatted = param_df_ddm %>%
+  dplyr::mutate(signif = case_when(
+    p < .001 ~ "***",
+    p < .01 ~ "**",
+    p < .05 ~ "*",
+    p < .10 ~ "+",
+    TRUE ~ ""
+  )) %>%
+  dplyr::mutate(F = paste0(format(round(F, 2), nsmall = 2), signif),
+         eta_squared = format(round(eta_squared, 2), nsmall = 2)) %>%
+  dplyr::select(parameter, F, eta_squared)
+param_df_ddm_formatted$model = "ddm"
+param_df_ddm_bf = do.call(rbind, lapply(params, fill_df_Bayesian, df = ddm_nodeadline))
+
+bf_cols = colnames(param_df_ddm_bf)[2:5]
+param_df_ddm_bf[bf_cols] = lapply(param_df_ddm_bf[bf_cols], function(col) sapply(col, format_BF))
+global_bf = param_df_ddm_bf$BF_global
+F_df_ddm = cbind(param_df_ddm_formatted, global_bf)
+
+F_df = rbind(F_df_lfm, F_df_ddm)
+```
+
+## Directional Hypothesis
+
+```{r test_directional_alpha, include=T, warning=F, message=F}
+#Test acc < implicit < explicit
+bf1 = BayesFactor::anovaBF(alpha ~ condition, data = lfm_nodeadline)
+samples = posterior(bf1, iterations = 10000)
+
+consistent = (samples[, "condition-acc"] > samples[, "condition-implicitDeadline"]) &
+  (samples[, "condition-implicitDeadline"] > samples[, "condition-explicitDeadline"])
+N_consistent = sum(consistent)
+
+bf_restriction_against_full = (N_consistent / 10000) / (1 / 6)
+bf_full_against_null = as.vector(bf1)
+bf_restriction_against_null = bf_restriction_against_full * bf_full_against_null
+
+cat("--- BF10 for alpha_acc < alpha_implicit < alpha_explicit ---")
+bf_restriction_against_null
+```
+
+## Differences Between Groups
+
+```{r ANOVA_params, include=T, warning=F, message=F}
+F_df[which(F_df$parameter=="alpha" & F_df$model=="ddm"), ] = NA
+F_df_reshaped = F_df %>%
+  tidyr::pivot_wider(
+    names_from = model, 
+    values_from = c(F, eta_squared, global_bf),  
+    names_glue = "{.value}_{model}"  
+  )
+F_df_reshaped = F_df_reshaped %>% dplyr::select(parameter, F_lfm, eta_squared_lfm, global_bf_lfm,
+                                         F_ddm, eta_squared_ddm, global_bf_ddm)
+
+ft_bf = flextable::flextable(F_df_reshaped)
+new_col_names = c("Parameter", rep(c("F", "η²", "BF10"), length(params)))
+ft_bf = flextable::set_header_labels(ft_bf, values = setNames(new_col_names, names(F_df_reshaped)))
+ft_bf = add_header_row(
+    ft_bf,
+    values = c("", "Simple Lévy-flight model", "Simple diffusion model"),
+    colwidths = c(1, 3, 3)
+)
+ft_bf
+```
+
+
+```{r params_pairwise, include=T, warning=F, message=F}
+my_comp = my_compi
+my_comp$df = NULL
+
+my_comp_wide = my_comp %>%
+  dplyr::mutate(across(c(t, d), ~ round(.x, 2))) %>%
+  dplyr::mutate(
+    sig = case_when(
+      p < .001 ~ "***",
+      p < .01 ~ "**",
+      p < .05 ~ "*",
+      p < .10 ~ "+",
+      TRUE ~ ""
+    ),
+    t = paste0(format(t, nsmall = 2), sig),
+    d = format(d, nsmall = 2)
+  ) %>%
+  dplyr::select(param, Comparison, t, d, model) %>%
+  tidyr::pivot_wider(names_from = param, values_from = c(t, d))
+
+prepare_bf_table = function(df_bf, model_name) {
+  df_bf_t = df_bf
+  df_bf_t[, 2] = NULL  # Remove "params" second column
+  rownames(df_bf_t) = df_bf$params
+  df_clean = df_bf_t[, -1]
+  df_clean = as.data.frame(t(df_clean))
+  df_clean$Comparison = rownames(df_clean)
+  df_clean = df_clean[, c("Comparison", setdiff(names(df_clean), "Comparison"))]
+  df_clean$Comparison = dplyr::recode(
+    df_clean$Comparison,
+    "BF_acc_vs_expl" = "Accuracy vs. explicit deadline",
+    "BF_acc_vs_impl" = "Accuracy vs. implicit deadline",
+    "BF_impl_vs_expl" = "Implicit vs. explicit deadline"
+  )
+  colnames(df_clean)[2:(length(params)+1)] = paste0("BF_", colnames(df_clean)[2:(length(params)+1)])
+  df_clean$model = model_name
+  df_clean
+}
+
+param_df_lfm_bf_t = prepare_bf_table(param_df_lfm_bf, "levy")
+param_df_ddm_bf_t = prepare_bf_table(param_df_ddm_bf, "ddm")
+param_both = rbind(param_df_lfm_bf_t, param_df_ddm_bf_t)
+
+bf_table_sim_wide = bf_table_sim %>%
+  dplyr::mutate(parameter = paste0("BF_", parameter)) %>%
+  tidyr::pivot_wider(names_from = parameter, values_from = BF) %>%
+  dplyr::select(all_of(colnames(param_both)))
+
+param_table = rbind(param_both, bf_table_sim_wide)
+
+my_comp_wide = my_comp_wide %>%
+  dplyr::mutate(Comparison = dplyr::recode(
+    Comparison,
+    "acc - explicitDeadline" = "Accuracy vs. explicit deadline",
+    "acc - implicitDeadline" = "Accuracy vs. implicit deadline",
+    "implicitDeadline - explicitDeadline" = "Implicit vs. explicit deadline"
+  ))
+
+my_comp_merge = merge(my_comp_wide, param_table, all = TRUE)
+cols_order = c("Comparison", "model")
+for (param in params) {
+  cols_order = c(cols_order, paste0("t_", param), paste0("d_", param), paste0("BF_", param))
+}
+my_comp_merge = my_comp_merge[, cols_order]
+my_comp_merge = my_comp_merge %>%
+  mutate(
+    model = factor(model, levels = c("levy", "ddm")),
+    Comparison = factor(Comparison, levels = c(
+      "Accuracy vs. explicit deadline",
+      "Accuracy vs. implicit deadline",
+      "Implicit vs. explicit deadline",
+      "Explicit deadline: main vs. additional"
+    ))
+  ) %>%
+  arrange(model, Comparison)
+my_comp_merge[which(my_comp_merge$model == "ddm"), c("t_alpha", "d_alpha", "BF_alpha")] = ""
+
+my_comp_table = my_comp_merge
+my_comp_table$Comparison = as.character(my_comp_table$Comparison)
+my_comp_table$model = as.character(my_comp_table$model)
+my_comp_table = rbind(
+  c("Simple LFM", rep("", ncol(my_comp_table) - 1)),
+  my_comp_table[1:4, ],
+  c("Simple DDM", rep("", ncol(my_comp_table) - 1)),
+  my_comp_table[5:8, ]
+)
+my_comp_table = as.data.frame(my_comp_table)
+my_comp_table$model = NULL
+
+
+ft_bf = flextable::flextable(my_comp_table)
+new_col_names = c("Comparison", rep(c("t", "d", "BF"), length(params)))
+ft_bf = flextable::set_header_labels(ft_bf, values = setNames(new_col_names, names(my_comp_table)))
+ft_bf = add_header_row(
+  ft_bf,
+  values = c("", "α", "a", "zr", "v0", "v1", "t0", "st0"),
+  colwidths = c(1, rep(3, length(params)))
+)
+
+ft_bf_formatted = ft_bf %>%
+  flextable::align(align = "left", part = "all", j = 1) %>%
+  flextable::align(align = "center", part = "all", j = 2:(length(params)*3+1)) %>%
+  flextable::fontsize(size = 7, part = "all") %>%
+  flextable::width(j = 1, width = 1) %>%
+  flextable::width(j = 2:(length(params)*2+1), width = 0.5)
+ft_bf_formatted
+```
