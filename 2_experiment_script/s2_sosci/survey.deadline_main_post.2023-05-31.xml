@@ -1,0 +1,2350 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE surveyProject SYSTEM "doctype.survey.dtd">
+<surveyProject version="2.4" timestamp="2023-05-31 10:20:48" program="oFb" progversion="3.4.16 1344">
+<title>helldunkel_main_post</title>
+<description />
+<attributes.specific program="ofb">
+<attr id="language">ger</attr>
+</attributes.specific>
+<section>
+<title>demo</title>
+<attributes.specific program="ofb">
+<attr id="id">DE</attr>
+<attr id="pos">1</attr>
+</attributes.specific>
+<question>
+<description>age</description>
+<class>text</class>
+<title>Wie alt sind Sie?</title>
+<explanation />
+<inputPosition>right</inputPosition>
+<order>default</order>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+<attr id="number">no</attr>
+<attr id="restrictions.answered">yes</attr>
+</attributes.specific>
+<item>
+<text />
+<suffix>Jahre</suffix>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+<attr id="width">100</attr>
+<attr id="restrictions.charset">number</attr>
+<attr id="restrictions.min">18</attr>
+<attr id="restrictions.max">99</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">age</alias>
+</variables>
+</item>
+</question>
+<question>
+<description>student</description>
+<class>select</class>
+<title>
+<![CDATA[<div align="center" style="padding: 0px 0px 12px;"><h1>Fragen zu Ihrer Person</h1></div>
+<p>Studieren Sie?</p>]]>
+</title>
+<explanation />
+<inputPosition>right</inputPosition>
+<order>default</order>
+<attributes.specific program="ofb">
+<attr id="id">2</attr>
+<attr id="pos">2</attr>
+<attr id="number">no</attr>
+<attr id="restrictions.answered">yes</attr>
+</attributes.specific>
+<filter>
+<condition type="any">
+<value id="vOpt">2</value>
+</condition>
+<effect type="+qst">
+<value id="qIS">DE03</value>
+</effect>
+</filter>
+<filter>
+<condition type="any">
+<value id="vOpt">1</value>
+</condition>
+<effect type="+qst">
+<value id="qIS">DE05</value>
+</effect>
+</filter>
+<filter>
+<condition type="any">
+<value id="vOpt">1</value>
+</condition>
+<effect type="+qst">
+<value id="qIS">DE06</value>
+</effect>
+</filter>
+<filter>
+<condition type="any">
+<value id="vOpt">1</value>
+</condition>
+<effect type="-qst">
+<value id="qIS">DE04</value>
+</effect>
+</filter>
+<variables>
+<alias ix="0">student</alias>
+</variables>
+<item>
+<text>Nein</text>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+</attributes.specific>
+</item>
+<item>
+<text>Ja</text>
+<attributes.specific program="ofb">
+<attr id="id">2</attr>
+<attr id="pos">2</attr>
+</attributes.specific>
+</item>
+</question>
+<question>
+<description>psycho</description>
+<class>select</class>
+<title>
+<![CDATA[<div align="center" style="padding: 0px 0px 12px;"><h1>Fragen zu Ihrer Person</h1></div>
+<p>Ist Ihr Studienfach Psychologie?</p>]]>
+</title>
+<explanation />
+<inputPosition>right</inputPosition>
+<order>default</order>
+<attributes.specific program="ofb">
+<attr id="id">3</attr>
+<attr id="pos">3</attr>
+<attr id="number">no</attr>
+<attr id="restrictions.answered">yes</attr>
+</attributes.specific>
+<filter>
+<condition type="any">
+<value id="vOpt">1</value>
+</condition>
+<effect type="+qst">
+<value id="qIS">DE04</value>
+</effect>
+</filter>
+<filter>
+<condition type="any">
+<value id="vOpt">1</value>
+</condition>
+<effect type="+qst">
+<value id="qIS">DE05</value>
+</effect>
+</filter>
+<variables>
+<alias ix="0">psycho</alias>
+</variables>
+<item>
+<text>Nein</text>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+</attributes.specific>
+</item>
+<item>
+<text>Ja</text>
+<attributes.specific program="ofb">
+<attr id="id">2</attr>
+<attr id="pos">2</attr>
+</attributes.specific>
+</item>
+</question>
+<question>
+<description>subject</description>
+<class>text</class>
+<title>
+<![CDATA[<div align="center" style="padding: 0px 0px 12px;"><h1>Fragen zu Ihrer Person</h1></div>
+<p>Welches Fach studieren Sie?</p>]]>
+</title>
+<explanation />
+<inputPosition>right</inputPosition>
+<order>default</order>
+<attributes.specific program="ofb">
+<attr id="id">4</attr>
+<attr id="pos">4</attr>
+<attr id="number">no</attr>
+<attr id="restrictions.answered">yes</attr>
+</attributes.specific>
+<item>
+<text />
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">subject</alias>
+</variables>
+</item>
+</question>
+<question>
+<description>psychopast</description>
+<class>select</class>
+<title>
+<![CDATA[<div align="center" style="padding: 0px 0px 12px;"><h1>Fragen zu Ihrer Person</h1></div>
+<p>Haben Sie Psychologie studiert?</p>]]>
+</title>
+<explanation />
+<inputPosition>right</inputPosition>
+<order>default</order>
+<attributes.specific program="ofb">
+<attr id="id">5</attr>
+<attr id="pos">5</attr>
+<attr id="number">no</attr>
+<attr id="restrictions.answered">yes</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">psychopast</alias>
+</variables>
+<item>
+<text>Nein</text>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+</attributes.specific>
+</item>
+<item>
+<text>Ja</text>
+<attributes.specific program="ofb">
+<attr id="id">2</attr>
+<attr id="pos">2</attr>
+</attributes.specific>
+</item>
+</question>
+<question>
+<description>profession</description>
+<class>text</class>
+<title>Was machen Sie beruflich?</title>
+<explanation />
+<inputPosition>right</inputPosition>
+<order>default</order>
+<attributes.specific program="ofb">
+<attr id="id">6</attr>
+<attr id="pos">6</attr>
+<attr id="number">no</attr>
+<attr id="restrictions.answered">yes</attr>
+</attributes.specific>
+<item>
+<text />
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">profession</alias>
+</variables>
+</item>
+</question>
+<question>
+<description>mothertongue</description>
+<class>select</class>
+<title>
+<![CDATA[<div align="center" style="padding: 0px 0px 12px;"><h1>Fragen zu Ihrer Person</h1></div>
+<p>Was ist Ihre Muttersprache?</p>]]>
+</title>
+<explanation />
+<inputPosition>right</inputPosition>
+<order>default</order>
+<attributes.specific program="ofb">
+<attr id="id">7</attr>
+<attr id="pos">7</attr>
+<attr id="number">no</attr>
+<attr id="restrictions.answered">yes</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">mothertongue</alias>
+</variables>
+<item>
+<text>Deutsch</text>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+</attributes.specific>
+</item>
+<item>
+<text>Eine andere, und zwar:</text>
+<textinput>yes</textinput>
+<attributes.specific program="ofb">
+<attr id="id">2</attr>
+<attr id="pos">2</attr>
+<attr id="width">200</attr>
+<attr id="restrictions.charset">letters</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">mothertongue_other</alias>
+</variables>
+</item>
+</question>
+<question>
+<description>gender</description>
+<class>select</class>
+<title>Welcher Geschlechtskategorie würden Sie sich zuordnen?</title>
+<explanation>Sie können mehr über die einzelnen Kategorie erfahren, indem Sie mit der Computer-Maus darüberfahren und dort kurz verweilen.</explanation>
+<inputPosition>right</inputPosition>
+<order>default</order>
+<attributes.specific program="ofb">
+<attr id="id">8</attr>
+<attr id="pos">8</attr>
+<attr id="number">no</attr>
+<attr id="restrictions.answered">yes</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">gender</alias>
+</variables>
+<item>
+<text>
+<![CDATA[<div title="Als cis weiblich bzw. cis Frauen werden Personen bezeichnet, die sich mit dem bei der Geburt eingetragenem Geschlecht (weiblich) identifizieren.">Cis weiblich</div>]]>
+</text>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+</attributes.specific>
+</item>
+<item>
+<text>
+<![CDATA[<div title="Als cis männlich bzw cis Männer werden Personen bezeichnet, die sich mit dem bei der Geburt eingetragenem Geschlecht (männlich) identifizieren.">Cis männlich</div>]]>
+</text>
+<attributes.specific program="ofb">
+<attr id="id">2</attr>
+<attr id="pos">2</attr>
+</attributes.specific>
+</item>
+<item>
+<text>
+<![CDATA[<div title="Trans* ist eine mögliche Selbstbezeichnung von Personen, die sich nicht oder nur teilweise mit dem bei der Geburt eingetragenen Geschlecht identifizieren.">Trans* weiblich</div>]]>
+</text>
+<attributes.specific program="ofb">
+<attr id="id">3</attr>
+<attr id="pos">3</attr>
+</attributes.specific>
+</item>
+<item>
+<text>
+<![CDATA[<div title="Trans* ist eine mögliche Selbstbezeichnung von Personen, die sich nicht oder nur teilweise mit dem bei der Geburt eingetragenen Geschlecht identifizieren.">Trans* männlich</div>]]>
+</text>
+<attributes.specific program="ofb">
+<attr id="id">4</attr>
+<attr id="pos">4</attr>
+</attributes.specific>
+</item>
+<item>
+<text>
+<![CDATA[<div title="Nicht-binär ist eine mögliche Selbstbezeichnung von Personen, die sich nicht oder nicht ausschließlich männlich oder weiblich identifizieren.">Nicht-binär</div>]]>
+</text>
+<attributes.specific program="ofb">
+<attr id="id">5</attr>
+<attr id="pos">5</attr>
+</attributes.specific>
+</item>
+<item>
+<text>Einer anderen, und zwar:</text>
+<textinput>yes</textinput>
+<attributes.specific program="ofb">
+<attr id="id">6</attr>
+<attr id="pos">6</attr>
+<attr id="restrictions.charset">letters</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">gender_other</alias>
+</variables>
+</item>
+</question>
+</section>
+<section>
+<title>data</title>
+<attributes.specific program="ofb">
+<attr id="id">DA</attr>
+<attr id="pos">2</attr>
+</attributes.specific>
+<question>
+<description>storage</description>
+<class>select</class>
+<title>Die Daten dieser Studie werden anonymisiert erfasst und veröffentlicht. Hierbei ist kein Rückschluss auf spezifische Personen möglich. Die Daten werden öffentlich verfügbar gemacht werden und können von anderen Personen zur Nachnutzung verwendet werden. Die Daten werden nach den Richtlinien der Deutschen Forschungsgemeinschaft mindestens 10 Jahre aufbewahrt werden. Sind Sie damit einverstanden?</title>
+<explanation>Zur Erinnerung: Mit Ihrer Zustimmung unterstützen Sie den Erfolg dieser und weiterer Studien maßgeblich. Die Vergütung erfolgt jedoch unabhängig davon, ob Sie der Datenaufbewahrung zustimmen oder nicht.</explanation>
+<inputPosition>right</inputPosition>
+<order>default</order>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+<attr id="number">no</attr>
+<attr id="restrictions.answered">yes</attr>
+</attributes.specific>
+<filter>
+<condition type="any">
+<value id="vOpt">1</value>
+</condition>
+<effect type="+qst">
+<value id="qIS">DA03</value>
+</effect>
+</filter>
+<filter>
+<condition type="any">
+<value id="vOpt">2</value>
+</condition>
+<effect type="+qst">
+<value id="qIS">DA02</value>
+</effect>
+</filter>
+<variables>
+<alias ix="0">datastorage</alias>
+</variables>
+<item>
+<text>Ja, ich bin mit der Aufbewahrung einverstanden.</text>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+</attributes.specific>
+</item>
+<item>
+<text>Nein, ich möchte, dass meine Daten gelöscht werden.</text>
+<attributes.specific program="ofb">
+<attr id="id">2</attr>
+<attr id="pos">2</attr>
+</attributes.specific>
+</item>
+</question>
+<question>
+<description>deletedata</description>
+<class>TextContent</class>
+<title />
+<explanation />
+<inputPosition>right</inputPosition>
+<lead>
+<![CDATA[<p align="center">Sie haben nun das Ende der Studie erreicht. </p>
+
+<p align="center">Ihrem Wunsch gemäß werden wir Ihre Daten löschen. <br /></p>
+
+<p align="center">Für Ihre vollständige Teilnahme erhalten Sie 4,50 GBP.</p>
+
+<p align="center"><br /></p>
+
+<p align="center">Klicken Sie bitte rechts unten auf „Weiter“, um zu Prolific zurückzukehren.<br /></p>]]>
+</lead>
+<order>default</order>
+<attributes.specific program="ofb">
+<attr id="id">2</attr>
+<attr id="pos">2</attr>
+<attr id="alignment">default</attr>
+</attributes.specific>
+</question>
+<question>
+<description>savedata</description>
+<class>TextContent</class>
+<title />
+<explanation />
+<inputPosition>right</inputPosition>
+<lead>
+<![CDATA[<p align="center">Sie haben nun das Ende der Studie erreicht. </p>
+
+<p align="center">Danke, dass Sie der Datenaufbewahrung zugestimmt haben.
+<br /></p>
+
+<p align="center">Für Ihre vollständige Teilnahme erhalten Sie 4,50 GBP.</p>
+
+<p align="center"><br /></p>
+
+<p align="center">Klicken Sie bitte rechts unten auf „Weiter“, um zu Prolific zurückzukehren.<br /></p>]]>
+</lead>
+<order>default</order>
+<attributes.specific program="ofb">
+<attr id="id">3</attr>
+<attr id="pos">3</attr>
+<attr id="alignment">default</attr>
+</attributes.specific>
+</question>
+</section>
+<section>
+<title>strategy</title>
+<attributes.specific program="ofb">
+<attr id="id">ST</attr>
+<attr id="pos">3</attr>
+</attributes.specific>
+<question>
+<description>strategy</description>
+<class>text</class>
+<title>
+<![CDATA[Hatten Sie bei der Aufgabe, die Sie gerade bearbeitet haben, irgendeine Strategie oder verschiedene Strategien? 
+Bitte beschreiben Sie Ihre Strategie(n) auch kurz.]]>
+</title>
+<explanation />
+<inputPosition>right</inputPosition>
+<order>default</order>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+<attr id="number">no</attr>
+<attr id="restrictions.answered">yes</attr>
+</attributes.specific>
+<item>
+<text />
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+<attr id="height">100</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">strategy</alias>
+</variables>
+</item>
+</question>
+<question>
+<description>strategy_select</description>
+<class>select</class>
+<title>
+<![CDATA[Lesen Sie sich die folgenden Strategien durch, die man bei der Bearbeitung der Aufgabe haben kann. 
+Was trifft auf Ihre Aufgabenbearbeitung am ehesten zu?]]>
+</title>
+<explanation />
+<inputPosition>right</inputPosition>
+<order>default</order>
+<attributes.specific program="ofb">
+<attr id="id">2</attr>
+<attr id="pos">2</attr>
+<attr id="number">no</attr>
+<attr id="restrictions.answered">yes</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">strategy_select</alias>
+</variables>
+<item>
+<text>Keine Strategie</text>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+</attributes.specific>
+</item>
+<item>
+<text>Augen zukneifen</text>
+<attributes.specific program="ofb">
+<attr id="id">2</attr>
+<attr id="pos">2</attr>
+</attributes.specific>
+</item>
+<item>
+<text>Dem Gesameindruck folgen</text>
+<attributes.specific program="ofb">
+<attr id="id">3</attr>
+<attr id="pos">3</attr>
+</attributes.specific>
+</item>
+<item>
+<text>Nach der größten zusammenhängenden Fläche suchen</text>
+<attributes.specific program="ofb">
+<attr id="id">4</attr>
+<attr id="pos">4</attr>
+</attributes.specific>
+</item>
+<item>
+<text>Nur einen Teil der Gesamtfläche betrachten</text>
+<attributes.specific program="ofb">
+<attr id="id">5</attr>
+<attr id="pos">5</attr>
+</attributes.specific>
+</item>
+<item>
+<text> Auf den Rand des Bilds achten</text>
+<attributes.specific program="ofb">
+<attr id="id">6</attr>
+<attr id="pos">6</attr>
+<attr id="height">50</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">strategy_select_other</alias>
+</variables>
+</item>
+<item>
+<text>Sonstiges, und zwar:</text>
+<textinput>yes</textinput>
+<attributes.specific program="ofb">
+<attr id="id">7</attr>
+<attr id="pos">7</attr>
+</attributes.specific>
+</item>
+</question>
+<question>
+<description>comment</description>
+<class>text</class>
+<title>Haben Sie sonstige Anmerkungen zur Aufgabe (z. B., dass Sie etwas unklar fanden oder dass Sie die Aufgabe zeitweise falsch verstanden haben)?</title>
+<explanation />
+<inputPosition>right</inputPosition>
+<order>default</order>
+<attributes.specific program="ofb">
+<attr id="id">3</attr>
+<attr id="pos">3</attr>
+<attr id="number">no</attr>
+</attributes.specific>
+<item>
+<text />
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+<attr id="height">100</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">comment</alias>
+</variables>
+</item>
+</question>
+</section>
+<section>
+<title>percent_trials</title>
+<attributes.specific program="ofb">
+<attr id="id">PE</attr>
+<attr id="pos">4</attr>
+</attributes.specific>
+<question>
+<description>percent_trials</description>
+<class>scale</class>
+<title>In ca. wie viel Prozent der Durchgänge ...</title>
+<explanation />
+<inputPosition>right</inputPosition>
+<labels>
+<li i="1"><![CDATA[<b>0 %</b>]]></li>
+<li i="2"><![CDATA[<b>10 %</b>]]></li>
+<li i="3"><![CDATA[<b>20 %</b>]]></li>
+<li i="4"><![CDATA[<b>30 %</b>]]></li>
+<li i="5"><![CDATA[<b>40 %</b>]]></li>
+<li i="6"><![CDATA[<b>50 %</b>]]></li>
+<li i="7"><![CDATA[<b>60 %</b>]]></li>
+<li i="8"><![CDATA[<b>70 %</b>]]></li>
+<li i="9"><![CDATA[<b>80 %</b>]]></li>
+<li i="10"><![CDATA[<b>90 %</b>]]></li>
+<li i="11"><![CDATA[<b>100 %</b>]]></li>
+</labels>
+<order>default</order>
+<attributes.specific program="ofb">
+<attr id="id">3</attr>
+<attr id="pos">1</attr>
+<attr id="scale.display">complete</attr>
+<attr id="number">no</attr>
+<attr id="scale.niveau">11</attr>
+<attr id="restrictions.answered">yes</attr>
+<attr id="composition">default</attr>
+</attributes.specific>
+<item>
+<text>haben Sie sich auf Ihr Bauchgefühl verlassen?</text>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">percent_trials_gutfeeling</alias>
+</variables>
+</item>
+<item>
+<text>hat der Zeitdruck es Ihnen unmöglich gemacht, eine sichere Entscheidung zu treffen?</text>
+<attributes.specific program="ofb">
+<attr id="id">2</attr>
+<attr id="pos">2</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">percent_trials_pressure</alias>
+</variables>
+</item>
+</question>
+</section>
+<section>
+<title>DSSQ</title>
+<attributes.specific program="ofb">
+<attr id="id">DS</attr>
+<attr id="pos">5</attr>
+</attributes.specific>
+<question>
+<description>denkstil</description>
+<class>scale</class>
+<title>
+<![CDATA[In diesem Abschnitt geht es um Gedanken über sich selbst <span style="color:#116bde"><u>während der Aufgabe</u></span>: wie Ihr Denken funktionierte, wie selbstsicher Sie waren und wie gut Sie glauben, die Aufgabe bewältigt zu haben. Lesen Sie bitte jede Aussage sorgfältig und wählen Sie die Antwort, die am ehesten auf Ihre Gedanken <span style="color:#116bde"><u>während der Aufgabenbearbeitung</u></span> zutrifft.]]>
+</title>
+<explanation>
+<![CDATA[Markieren Sie dazu eine der folgenden Antworten: 
+Überhaupt nicht = 0 | Wenig = 1 | Etwas = 2 | Sehr = 3 | Äußerst = 4]]>
+</explanation>
+<headerRepeat>scroll</headerRepeat>
+<inputPosition>right</inputPosition>
+<labels>
+<li i="1"><![CDATA[<b>0<br>Überhaupt nicht</b>]]></li>
+<li i="2"><![CDATA[<b>1<br>Wenig<br><br></b>]]></li>
+<li i="3"><![CDATA[<b>2<br>Etwas<br><br></b>]]></li>
+<li i="4"><![CDATA[<b>3<br>Sehr<br><br></b>]]></li>
+<li i="5"><![CDATA[<b>4<br>Äußerst<br><br></b>]]></li>
+</labels>
+<order>default</order>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+<attr id="scale.display">complete</attr>
+<attr id="number">no</attr>
+<attr id="restrictions.answered">yes</attr>
+</attributes.specific>
+<item>
+<text>Ich versuchte, mich selbst zu verstehen.</text>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_1</alias>
+</variables>
+</item>
+<item>
+<text>Ich war mir meiner selbst sehr bewusst.</text>
+<attributes.specific program="ofb">
+<attr id="id">2</attr>
+<attr id="pos">2</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_2</alias>
+</variables>
+</item>
+<item>
+<text>Ich sann über mich selbst nach.</text>
+<attributes.specific program="ofb">
+<attr id="id">3</attr>
+<attr id="pos">3</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_3</alias>
+</variables>
+</item>
+<item>
+<text>Ich tagträumte von mir.</text>
+<attributes.specific program="ofb">
+<attr id="id">4</attr>
+<attr id="pos">4</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_4</alias>
+</variables>
+</item>
+<item>
+<text>Ich wälzte Gedanken über mich selbst.</text>
+<attributes.specific program="ofb">
+<attr id="id">5</attr>
+<attr id="pos">5</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_5</alias>
+</variables>
+</item>
+<item>
+<text>Ich schenkte meinen inneren Gefühlen Aufmerksamkeit.</text>
+<attributes.specific program="ofb">
+<attr id="id">6</attr>
+<attr id="pos">6</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_6</alias>
+</variables>
+</item>
+<item>
+<text>Ich überdachte die Beweggründe meines Handelns.</text>
+<attributes.specific program="ofb">
+<attr id="id">7</attr>
+<attr id="pos">7</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_7</alias>
+</variables>
+</item>
+<item>
+<text>Ich hatte das Gefühl, irgendwo abseits zu sein und mich selbst zu beobachten.</text>
+<attributes.specific program="ofb">
+<attr id="id">8</attr>
+<attr id="pos">8</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_8</alias>
+</variables>
+</item>
+<item>
+<text>Ich war überzeugt von meinen Fähigkeiten.</text>
+<attributes.specific program="ofb">
+<attr id="id">9</attr>
+<attr id="pos">9</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_9</alias>
+</variables>
+</item>
+<item>
+<text>Ich sorgte mich darum, ob ich für erfolgreich gehalten werde oder nicht.</text>
+<attributes.specific program="ofb">
+<attr id="id">10</attr>
+<attr id="pos">10</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_10</alias>
+</variables>
+</item>
+<item>
+<text>Ich fühlte mich gehemmt.</text>
+<attributes.specific program="ofb">
+<attr id="id">11</attr>
+<attr id="pos">11</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_11</alias>
+</variables>
+</item>
+<item>
+<text>Ich dachte, dass ich genauso klug wie andere bin.</text>
+<attributes.specific program="ofb">
+<attr id="id">12</attr>
+<attr id="pos">12</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_12</alias>
+</variables>
+</item>
+<item>
+<text>Ich machte mir Sorgen darüber, was andere von mir denken.</text>
+<attributes.specific program="ofb">
+<attr id="id">13</attr>
+<attr id="pos">13</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_13</alias>
+</variables>
+</item>
+<item>
+<text>Ich war mir sicher, dass ich die Dinge verstehe.</text>
+<attributes.specific program="ofb">
+<attr id="id">14</attr>
+<attr id="pos">14</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_14</alias>
+</variables>
+</item>
+<item>
+<text>Ich fühlte mich anderen unterlegen.</text>
+<attributes.specific program="ofb">
+<attr id="id">15</attr>
+<attr id="pos">15</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_15</alias>
+</variables>
+</item>
+<item>
+<text>Ich sorgte mich um den Eindruck, den ich mache.</text>
+<attributes.specific program="ofb">
+<attr id="id">16</attr>
+<attr id="pos">16</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_16</alias>
+</variables>
+</item>
+<item>
+<text>Ich fand, dass ich über weniger geistige Fähigkeiten verfüge als andere.</text>
+<attributes.specific program="ofb">
+<attr id="id">17</attr>
+<attr id="pos">17</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_17</alias>
+</variables>
+</item>
+<item>
+<text>Ich machte mir Sorgen, töricht zu wirken.</text>
+<attributes.specific program="ofb">
+<attr id="id">18</attr>
+<attr id="pos">18</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_18</alias>
+</variables>
+</item>
+<item>
+<text>Meine Aufmerksamkeit galt anderen Dingen als der Aufgabe.</text>
+<attributes.specific program="ofb">
+<attr id="id">19</attr>
+<attr id="pos">19</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_19</alias>
+</variables>
+</item>
+<item>
+<text>Ich wurde durch körperliche Empfindungen, wie z. B. Muskelverspannungen, abgelenkt.</text>
+<attributes.specific program="ofb">
+<attr id="id">20</attr>
+<attr id="pos">20</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_20</alias>
+</variables>
+</item>
+<item>
+<text>Meine Leistung wurde durch Gedanken, die für die Aufgabe unwichtig waren, beeinträchtigt.</text>
+<attributes.specific program="ofb">
+<attr id="id">21</attr>
+<attr id="pos">21</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_21</alias>
+</variables>
+</item>
+<item>
+<text>Ich hatte über zu viele Dinge nachzudenken, als dass ich mich auf die Aufgabe konzentrieren konnte.</text>
+<attributes.specific program="ofb">
+<attr id="id">22</attr>
+<attr id="pos">22</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_22</alias>
+</variables>
+</item>
+<item>
+<text>Mein Denken war im Allgemeinen klar und scharf.</text>
+<attributes.specific program="ofb">
+<attr id="id">23</attr>
+<attr id="pos">23</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_23</alias>
+</variables>
+</item>
+<item>
+<text>Es fiel mir schwer, meine Konzentration etwas länger aufrecht zu halten.</text>
+<attributes.specific program="ofb">
+<attr id="id">24</attr>
+<attr id="pos">24</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_24</alias>
+</variables>
+</item>
+<item>
+<text>Meine Gedanken wanderten sehr viel umher.</text>
+<attributes.specific program="ofb">
+<attr id="id">25</attr>
+<attr id="pos">25</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_25</alias>
+</variables>
+</item>
+<item>
+<text>Meine Gedanken waren verwirrt und schwer zu kontrollieren.</text>
+<attributes.specific program="ofb">
+<attr id="id">26</attr>
+<attr id="pos">26</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_26</alias>
+</variables>
+</item>
+<item>
+<text>Ich bewältigte die Aufgabe gut.</text>
+<attributes.specific program="ofb">
+<attr id="id">27</attr>
+<attr id="pos">27</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_27</alias>
+</variables>
+</item>
+<item>
+<text>Im Allgemeinen hatte ich das Gefühl, Herr der Lage zu sein.</text>
+<attributes.specific program="ofb">
+<attr id="id">28</attr>
+<attr id="pos">28</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">denkstil_28</alias>
+</variables>
+</item>
+</question>
+<question>
+<description>gedankeninhalt</description>
+<class>scale</class>
+<title>
+<![CDATA[Die folgenden Fragen betreffen Gedanken, die einem manchmal durch den Kopf gehen, während man eine Aufgabe erledigt. Bitte geben Sie in der folgenden Liste mit möglichen Gedanken an, <span style="color:#116bde"><u>wie oft</u></span> Sie jeden dieser Gedanken <span style="color:#116bde"><u>während der Aufgabenbearbeitung</u></span> hatten.]]>
+</title>
+<explanation>
+<![CDATA[Markieren Sie dazu bitte eine der folgenden Antworten: 
+Nie = 1 | Einmal = 2 | Ein paar Mal = 3 | Oft = 4  | Sehr oft = 5]]>
+</explanation>
+<headerRepeat>scroll</headerRepeat>
+<inputPosition>right</inputPosition>
+<labels>
+<li i="1"><![CDATA[<b>1<br>Nie</b><br><br>]]></li>
+<li i="2"><![CDATA[<b>2<br>Einmal</b><br><br>]]></li>
+<li i="3"><![CDATA[<b>3<br>Ein paar Mal</b>]]></li>
+<li i="4"><![CDATA[<b>4<br>Oft</b><br><br>]]></li>
+<li i="5"><![CDATA[<b>5<br>Sehr oft</b><br><br>]]></li>
+</labels>
+<order>default</order>
+<attributes.specific program="ofb">
+<attr id="id">2</attr>
+<attr id="pos">2</attr>
+<attr id="scale.display">complete</attr>
+<attr id="number">no</attr>
+<attr id="restrictions.answered">yes</attr>
+</attributes.specific>
+<item>
+<text>Ich dachte darüber nach, dass ich sorgfältiger arbeiten sollte.</text>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">gedankeninhalt_1</alias>
+</variables>
+</item>
+<item>
+<text>Ich dachte darüber nach, wie viel Zeit ich noch hatte.</text>
+<attributes.specific program="ofb">
+<attr id="id">2</attr>
+<attr id="pos">2</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">gedankeninhalt_2</alias>
+</variables>
+</item>
+<item>
+<text>Ich dachte darüber nach, wie andere die Aufgabe bewältigt haben.</text>
+<attributes.specific program="ofb">
+<attr id="id">3</attr>
+<attr id="pos">3</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">gedankeninhalt_3</alias>
+</variables>
+</item>
+<item>
+<text>Ich dachte über die Schwierigkeit der Aufgabe nach.</text>
+<attributes.specific program="ofb">
+<attr id="id">4</attr>
+<attr id="pos">4</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">gedankeninhalt_4</alias>
+</variables>
+</item>
+<item>
+<text>Ich dachte über meine Befähigung für die Aufgabe nach.</text>
+<attributes.specific program="ofb">
+<attr id="id">5</attr>
+<attr id="pos">5</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">gedankeninhalt_5</alias>
+</variables>
+</item>
+<item>
+<text>Ich dachte über das Ziel des Experiments nach.</text>
+<attributes.specific program="ofb">
+<attr id="id">6</attr>
+<attr id="pos">6</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">gedankeninhalt_6</alias>
+</variables>
+</item>
+<item>
+<text>Ich dachte darüber nach, wie ich mich fühlen würde, wenn ich meine Leistung in der Aufgabe mitgeteilt bekäme.</text>
+<attributes.specific program="ofb">
+<attr id="id">7</attr>
+<attr id="pos">7</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">gedankeninhalt_7</alias>
+</variables>
+</item>
+<item>
+<text>Ich dachte darüber nach, wie oft mich die Aufgabe verwirrte.</text>
+<attributes.specific program="ofb">
+<attr id="id">8</attr>
+<attr id="pos">8</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">gedankeninhalt_8</alias>
+</variables>
+</item>
+<item>
+<text>Ich dachte über Mitglieder meiner Familie nach.</text>
+<attributes.specific program="ofb">
+<attr id="id">9</attr>
+<attr id="pos">9</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">gedankeninhalt_9</alias>
+</variables>
+</item>
+<item>
+<text>Ich dachte über etwas nach, das mich schuldig fühlen ließ.</text>
+<attributes.specific program="ofb">
+<attr id="id">10</attr>
+<attr id="pos">10</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">gedankeninhalt_10</alias>
+</variables>
+</item>
+<item>
+<text>Ich dachte über persönliche Sorgen nach.</text>
+<attributes.specific program="ofb">
+<attr id="id">11</attr>
+<attr id="pos">11</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">gedankeninhalt_11</alias>
+</variables>
+</item>
+<item>
+<text>Ich dachte über etwas nach, das mich wütend fühlen ließ.</text>
+<attributes.specific program="ofb">
+<attr id="id">12</attr>
+<attr id="pos">12</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">gedankeninhalt_12</alias>
+</variables>
+</item>
+<item>
+<text>Ich dachte über etwas nach, das heute passiert ist.</text>
+<attributes.specific program="ofb">
+<attr id="id">13</attr>
+<attr id="pos">13</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">gedankeninhalt_13</alias>
+</variables>
+</item>
+<item>
+<text>Ich dachte über etwas nach, das vor Kurzem passiert ist (in den letzten Tagen, aber nicht heute).</text>
+<attributes.specific program="ofb">
+<attr id="id">14</attr>
+<attr id="pos">14</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">gedankeninhalt_14</alias>
+</variables>
+</item>
+<item>
+<text>Ich dachte über etwas nach, das vor langer Zeit passiert ist.</text>
+<attributes.specific program="ofb">
+<attr id="id">15</attr>
+<attr id="pos">15</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">gedankeninhalt_15</alias>
+</variables>
+</item>
+<item>
+<text>Ich dachte über etwas nach, das in der Zukunft passieren könnte.</text>
+<attributes.specific program="ofb">
+<attr id="id">16</attr>
+<attr id="pos">16</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">gedankeninhalt_16</alias>
+</variables>
+</item>
+</question>
+</section>
+<section>
+<title>UPPS</title>
+<attributes.specific program="ofb">
+<attr id="id">UP</attr>
+<attr id="pos">6</attr>
+</attributes.specific>
+<question>
+<description>UPPS</description>
+<class>scale</class>
+<title>
+<![CDATA[Nachstehend finden Sie eine Reihe von Beschreibungen, wie Menschen denken und handeln. Bitte geben Sie für jede Beschreibung an, inwiefern sie für Sie zutrifft.
+
+<span style="color:#116bde">Bitte beachten Sie die Bedeutung der Antwortoptionen!</span>]]>
+</title>
+<explanation>
+<![CDATA[Wenn Sie die Beschreibung für <b>sehr zutreffend</b> halten, wählen Sie bitte die <b>1</b>, wenn Sie sie für <b>eher zutreffend</b> halten, wählen Sie bitte die <b>2</b>, wenn Sie sie für <b>eher <span style="color:#116bde"><u>un</u></span>zutreffend</b> halten, wählen Sie bitte die <b>3</b>, und wenn Sie sie für <b>sehr <span style="color:#116bde"><u>un</u></span>zutreffend</b> halten, wählen Sie bitte die <b>4</b>.]]>
+</explanation>
+<headerRepeat>scroll</headerRepeat>
+<inputPosition>right</inputPosition>
+<labels>
+<li i="1"><![CDATA[<b>1<br>Sehr<br>zutreffend<br></b>]]></li>
+<li i="2"><![CDATA[<b>2<br>Eher<br>zutreffend<br></b>]]></li>
+<li i="3"><![CDATA[<b>3<br>Eher <span style="color:#116bde"><u>un</u></span>zutreffend</b>]]></li>
+<li i="4"><![CDATA[<b>4<br>Sehr <span style="color:#116bde"><u>un</u></span>zutreffend</b>]]></li>
+</labels>
+<order>default</order>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+<attr id="scale.metrics.extrema">100</attr>
+<attr id="scale.display">complete</attr>
+<attr id="number">no</attr>
+<attr id="scale.niveau">4</attr>
+<attr id="restrictions.answered">yes</attr>
+<attr id="alignment">center</attr>
+</attributes.specific>
+<item>
+<text>Ich habe dem Leben gegenüber eine zurückhaltende und vorsichtige Haltung.</text>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_1</alias>
+</variables>
+</item>
+<item>
+<text>Es fällt mir schwer, spontane Handlungsimpulse zu kontrollieren.</text>
+<attributes.specific program="ofb">
+<attr id="id">2</attr>
+<attr id="pos">2</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_2</alias>
+</variables>
+</item>
+<item>
+<text>Ich suche im Allgemeinen nach neuen und aufregenden Erfahrungen und Erlebnissen.</text>
+<attributes.specific program="ofb">
+<attr id="id">3</attr>
+<attr id="pos">3</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_3</alias>
+</variables>
+</item>
+<item>
+<text>Ich führe Dinge im Allgemeinen gerne zu Ende.</text>
+<attributes.specific program="ofb">
+<attr id="id">4</attr>
+<attr id="pos">4</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_4</alias>
+</variables>
+</item>
+<item>
+<text>Mein Denken ist in der Regel sorgfältig und zielgerichtet.</text>
+<attributes.specific program="ofb">
+<attr id="id">5</attr>
+<attr id="pos">5</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_5</alias>
+</variables>
+</item>
+<item>
+<text>Es fällt mir schwer, meinen Begierden zu widerstehen (z.B. nach Essen, Zigaretten).</text>
+<attributes.specific program="ofb">
+<attr id="id">6</attr>
+<attr id="pos">6</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_6</alias>
+</variables>
+</item>
+<item>
+<text>Ich probiere gerne alles einmal aus.</text>
+<attributes.specific program="ofb">
+<attr id="id">7</attr>
+<attr id="pos">7</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_7</alias>
+</variables>
+</item>
+<item>
+<text>Ich neige dazu, leicht aufzugeben.</text>
+<attributes.specific program="ofb">
+<attr id="id">8</attr>
+<attr id="pos">8</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_8</alias>
+</variables>
+</item>
+<item>
+<text>Ich zähle nicht zu den Menschen, die etwas unüberlegt ausplaudern.</text>
+<attributes.specific program="ofb">
+<attr id="id">9</attr>
+<attr id="pos">9</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_9</alias>
+</variables>
+</item>
+<item>
+<text>Ich werde oft in Situationen verwickelt, aus denen ich später gerne wieder herauskommen würde.</text>
+<attributes.specific program="ofb">
+<attr id="id">10</attr>
+<attr id="pos">10</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_10</alias>
+</variables>
+</item>
+<item>
+<text>Ich mag Sportarten und Spiele, bei denen man die nächste Bewegung oder den nächsten Zug sehr schnell ausführen muss.</text>
+<attributes.specific program="ofb">
+<attr id="id">11</attr>
+<attr id="pos">11</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_11</alias>
+</variables>
+</item>
+<item>
+<text>Unbeendete Aufgaben sind mir sehr unangenehm.</text>
+<attributes.specific program="ofb">
+<attr id="id">12</attr>
+<attr id="pos">12</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_12</alias>
+</variables>
+</item>
+<item>
+<text>Ich lege gerne eine Denkpause ein, bevor ich handle.</text>
+<attributes.specific program="ofb">
+<attr id="id">13</attr>
+<attr id="pos">13</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_13</alias>
+</variables>
+</item>
+<item>
+<text>Wenn ich mich schlecht fühle, tue ich oft Dinge, um mich kurzfristig besser zu fühlen, die ich später aber bereue.</text>
+<attributes.specific program="ofb">
+<attr id="id">14</attr>
+<attr id="pos">14</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_14</alias>
+</variables>
+</item>
+<item>
+<text>Wasserskifahren würde mir Spass machen.</text>
+<attributes.specific program="ofb">
+<attr id="id">15</attr>
+<attr id="pos">15</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_15</alias>
+</variables>
+</item>
+<item>
+<text>Bin ich erst einmal in eine Tätigkeit vertieft, höre ich nur äusserst ungern wieder damit auf.</text>
+<attributes.specific program="ofb">
+<attr id="id">16</attr>
+<attr id="pos">16</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_16</alias>
+</variables>
+</item>
+<item>
+<text>Solange ich nicht genau weiss, wie ein Projekt anzugehen ist, fange ich nur ungern damit an.</text>
+<attributes.specific program="ofb">
+<attr id="id">17</attr>
+<attr id="pos">17</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_17</alias>
+</variables>
+</item>
+<item>
+<text>Manchmal, wenn ich mich schlecht fühle, kann ich einfach nicht aufhören mit dem, was ich gerade tue, auch wenn es mir dadurch nur noch schlechter geht.</text>
+<attributes.specific program="ofb">
+<attr id="id">18</attr>
+<attr id="pos">18</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_18</alias>
+</variables>
+</item>
+<item>
+<text>Ich gehe ziemlich gerne Risiken ein.</text>
+<attributes.specific program="ofb">
+<attr id="id">19</attr>
+<attr id="pos">19</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_19</alias>
+</variables>
+</item>
+<item>
+<text>Es fällt mir leicht, mich auf etwas zu konzentrieren.</text>
+<attributes.specific program="ofb">
+<attr id="id">20</attr>
+<attr id="pos">20</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_20</alias>
+</variables>
+</item>
+<item>
+<text>Fallschirmspringen würde mir Spass machen.</text>
+<attributes.specific program="ofb">
+<attr id="id">21</attr>
+<attr id="pos">21</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_21</alias>
+</variables>
+</item>
+<item>
+<text>Was ich einmal angefangen habe, bringe ich auch zu Ende.</text>
+<attributes.specific program="ofb">
+<attr id="id">22</attr>
+<attr id="pos">22</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_22</alias>
+</variables>
+</item>
+<item>
+<text>Ich neige dazu, eine rationale und vernünftige Herangehensweise zu befürworten und zu befolgen.</text>
+<attributes.specific program="ofb">
+<attr id="id">23</attr>
+<attr id="pos">23</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_23</alias>
+</variables>
+</item>
+<item>
+<text>Wenn ich aufgeregt bin, handle ich oft unüberlegt.</text>
+<attributes.specific program="ofb">
+<attr id="id">24</attr>
+<attr id="pos">24</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_24</alias>
+</variables>
+</item>
+<item>
+<text>Ich mag neue und aufregende Erfahrungen und Erlebnisse, selbst wenn sie ein bisschen furchterregend und unkonventionell sind.</text>
+<attributes.specific program="ofb">
+<attr id="id">25</attr>
+<attr id="pos">25</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_25</alias>
+</variables>
+</item>
+<item>
+<text>Ich verstehe es ziemlich gut, mich so zu organisieren, dass Arbeiten rechtzeitig erledigt werden.</text>
+<attributes.specific program="ofb">
+<attr id="id">26</attr>
+<attr id="pos">26</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_26</alias>
+</variables>
+</item>
+<item>
+<text>Entscheidungen fälle ich gewöhnlich nach reiflicher Überlegung.</text>
+<attributes.specific program="ofb">
+<attr id="id">27</attr>
+<attr id="pos">27</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_27</alias>
+</variables>
+</item>
+<item>
+<text>Wenn ich mich abgelehnt fühle, sage ich oft Dinge, die ich später bereue.</text>
+<attributes.specific program="ofb">
+<attr id="id">28</attr>
+<attr id="pos">28</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_28</alias>
+</variables>
+</item>
+<item>
+<text>Ich würde gerne lernen, ein Flugzeug zu pilotieren.</text>
+<attributes.specific program="ofb">
+<attr id="id">29</attr>
+<attr id="pos">29</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_29</alias>
+</variables>
+</item>
+<item>
+<text>Ich bin ein produktiver Mensch, der seine Arbeit immer erledigt.</text>
+<attributes.specific program="ofb">
+<attr id="id">30</attr>
+<attr id="pos">30</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_30</alias>
+</variables>
+</item>
+<item>
+<text>Ich bin eine vorsichtige Person.</text>
+<attributes.specific program="ofb">
+<attr id="id">31</attr>
+<attr id="pos">31</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_31</alias>
+</variables>
+</item>
+<item>
+<text>Es fällt mir schwer, mich daran zu hindern, nach meinen Gefühlen zu handeln.</text>
+<attributes.specific program="ofb">
+<attr id="id">32</attr>
+<attr id="pos">32</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_32</alias>
+</variables>
+</item>
+<item>
+<text>Manchmal tue ich gerne etwas, das ein wenig furchterregend ist.</text>
+<attributes.specific program="ofb">
+<attr id="id">33</attr>
+<attr id="pos">33</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_33</alias>
+</variables>
+</item>
+<item>
+<text>Wenn ich erst einmal mit einem Projekt beginne, so führe ich es fast immer zu Ende.</text>
+<attributes.specific program="ofb">
+<attr id="id">34</attr>
+<attr id="pos">34</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_34</alias>
+</variables>
+</item>
+<item>
+<text>Bevor ich mich in eine neue Situation begebe, bringe ich gerne in Erfahrung, was ich davon zu erwarten habe.</text>
+<attributes.specific program="ofb">
+<attr id="id">35</attr>
+<attr id="pos">35</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_35</alias>
+</variables>
+</item>
+<item>
+<text>Oft mache ich etwas nur noch schlimmer, weil ich unüberlegt handle, wenn ich aufgeregt bin.</text>
+<attributes.specific program="ofb">
+<attr id="id">36</attr>
+<attr id="pos">36</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_36</alias>
+</variables>
+</item>
+<item>
+<text>Ich würde das Erlebnis geniessen, sehr schnell auf einer Skipiste hinunterzufahren.</text>
+<attributes.specific program="ofb">
+<attr id="id">37</attr>
+<attr id="pos">37</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_37</alias>
+</variables>
+</item>
+<item>
+<text>Es gibt so viele kleine Dinge zu erledigen, dass ich manchmal einfach alle ignoriere.</text>
+<attributes.specific program="ofb">
+<attr id="id">38</attr>
+<attr id="pos">38</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_38</alias>
+</variables>
+</item>
+<item>
+<text>Gewöhnlich denke ich sorgfältig nach, bevor ich irgendetwas unternehme.</text>
+<attributes.specific program="ofb">
+<attr id="id">39</attr>
+<attr id="pos">39</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_39</alias>
+</variables>
+</item>
+<item>
+<text>Bevor ich eine Entscheidung fälle, wäge ich alle Vor- und Nachteile ab.</text>
+<attributes.specific program="ofb">
+<attr id="id">40</attr>
+<attr id="pos">40</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_40</alias>
+</variables>
+</item>
+<item>
+<text>In der Hitze eines Wortgefechts sage ich oft Dinge, die ich später bereue.</text>
+<attributes.specific program="ofb">
+<attr id="id">41</attr>
+<attr id="pos">41</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_41</alias>
+</variables>
+</item>
+<item>
+<text>Ich würde gerne mit einer Ausrüstung (Sauerstoffflaschen usw.) tauchen gehen.</text>
+<attributes.specific program="ofb">
+<attr id="id">42</attr>
+<attr id="pos">42</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_42</alias>
+</variables>
+</item>
+<item>
+<text>Ich bin immer in der Lage, meine Gefühle unter Kontrolle zu halten.</text>
+<attributes.specific program="ofb">
+<attr id="id">43</attr>
+<attr id="pos">43</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_43</alias>
+</variables>
+</item>
+<item>
+<text>Schnell fahren (z.B. mit dem Auto) würde mir Spass machen.</text>
+<attributes.specific program="ofb">
+<attr id="id">44</attr>
+<attr id="pos">44</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_44</alias>
+</variables>
+</item>
+<item>
+<text>Manchmal tue ich aus einem Handlungsimpuls heraus Dinge, die ich später bereue.</text>
+<attributes.specific program="ofb">
+<attr id="id">45</attr>
+<attr id="pos">45</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">UPPS_45</alias>
+</variables>
+</item>
+</question>
+</section>
+<section>
+<title>parameter</title>
+<attributes.specific program="ofb">
+<attr id="id">UR</attr>
+<attr id="pos">7</attr>
+</attributes.specific>
+<question>
+<description>parameter</description>
+<class>client</class>
+<title />
+<explanation />
+<inputPosition>right</inputPosition>
+<order>default</order>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+<attr id="settings">
+<li i="6">yes</li>
+<li i="10">pp</li>
+<li i="11">ext</li>
+<li i="23">yes</li>
+</attr>
+</attributes.specific>
+<variables>
+<alias ix="6">screen_width</alias>
+<alias ix="7">screen_height</alias>
+<alias ix="10">pp</alias>
+<alias ix="11">ext</alias>
+<alias ix="23">referer</alias>
+</variables>
+</question>
+</section>
+<section>
+<title>frustration</title>
+<attributes.specific program="ofb">
+<attr id="id">FB</attr>
+<attr id="pos">8</attr>
+</attributes.specific>
+<question>
+<description>frust</description>
+<class>scale</class>
+<title>Bitte geben Sie an, zu welchem Grad Sie den nachfolgenden Aussagen zustimmen.</title>
+<explanation />
+<inputPosition>right</inputPosition>
+<labels>
+<li i="1"><![CDATA[<b>1<br>stimme gar nicht zu</b>]]></li>
+<li i="2"><![CDATA[<b>2<br><br><br></b>]]></li>
+<li i="3"><![CDATA[<b>3<br><br><br></b>]]></li>
+<li i="4"><![CDATA[<b>4<br><br><br></b>]]></li>
+<li i="5"><![CDATA[<b>5<br><br><br></b>]]></li>
+<li i="6"><![CDATA[<b>6<br><br><br></b>]]></li>
+<li i="7"><![CDATA[<b>7<br><br><br></b>]]></li>
+<li i="8"><![CDATA[<b>8<br><br><br></b>]]></li>
+<li i="9"><![CDATA[<b>9<br><br><br></b>]]></li>
+<li i="10"><![CDATA[<b>10<br>stimme voll und ganz zu</b>]]></li>
+<li i="11"><![CDATA[<b>100 %</b>]]></li>
+</labels>
+<order>default</order>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+<attr id="scale.display">complete</attr>
+<attr id="number">no</attr>
+<attr id="scale.niveau">10</attr>
+<attr id="restrictions.answered">yes</attr>
+<attr id="composition">default</attr>
+</attributes.specific>
+<item>
+<text>Die Aufgabe war frustrierend.</text>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">frust</alias>
+</variables>
+</item>
+</question>
+</section>
+<section>
+<title>RTS-D</title>
+<attributes.specific program="ofb">
+<attr id="id">RT</attr>
+<attr id="pos">9</attr>
+</attributes.specific>
+<question>
+<description>RTS-D</description>
+<class>scale</class>
+<title>Bitte geben Sie an, zu welchem Grad die nachfolgenden Aussagen auf Sie zutreffen.</title>
+<explanation />
+<headerRepeat>scroll</headerRepeat>
+<inputPosition>right</inputPosition>
+<labels>
+<li i="1"><![CDATA[<b>1<br>überhaupt nicht</b>]]></li>
+<li i="2"><![CDATA[<b>2</b>]]></li>
+<li i="3"><![CDATA[<b>3</b>]]></li>
+<li i="4"><![CDATA[<b>4</b>]]></li>
+<li i="5"><![CDATA[<b>5</b>]]></li>
+<li i="6"><![CDATA[<b>6</b>]]></li>
+<li i="7"><![CDATA[<b>7<br>ganz genau</b>]]></li>
+</labels>
+<order>default</order>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+<attr id="scale.display">complete</attr>
+<attr id="number">no</attr>
+<attr id="scale.niveau">7</attr>
+<attr id="restrictions.answered">yes</attr>
+</attributes.specific>
+<item>
+<text>Ich stelle fest, dass mir Dinge oft wiederholt durch den Kopf gehen.</text>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">RTS_1</alias>
+</variables>
+</item>
+<item>
+<text>Wenn ich ein Problem habe, zerbreche ich mir lange den Kopf darüber.</text>
+<attributes.specific program="ofb">
+<attr id="id">2</attr>
+<attr id="pos">2</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">RTS_2</alias>
+</variables>
+</item>
+<item>
+<text>Ich meine, dass mir im Laufe des Tages bestimmte Gedanken immer wieder in den Sinn kommen.</text>
+<attributes.specific program="ofb">
+<attr id="id">3</attr>
+<attr id="pos">3</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">RTS_3</alias>
+</variables>
+</item>
+<item>
+<text>Ich kann nicht aufhören, über gewisse Dinge nachzudenken.</text>
+<attributes.specific program="ofb">
+<attr id="id">4</attr>
+<attr id="pos">4</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">RTS_4</alias>
+</variables>
+</item>
+<item>
+<text>Wenn ich an eine bevorstehende Begegnung mit jemandem denke, dann stelle ich mir alle möglichen Szenarien und Gesprächsverläufe vor.</text>
+<attributes.specific program="ofb">
+<attr id="id">5</attr>
+<attr id="pos">5</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">RTS_5</alias>
+</variables>
+</item>
+<item>
+<text>Ich tendiere dazu, mir vergangene Ereignisse so vorzustellen, wie ich sie gerne gehabt hätte.</text>
+<attributes.specific program="ofb">
+<attr id="id">6</attr>
+<attr id="pos">6</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">RTS_6</alias>
+</variables>
+</item>
+<item>
+<text>Ich ertappe mich dabei, wie ich über Dinge nachsinne, die ich gerne getan hätte.</text>
+<attributes.specific program="ofb">
+<attr id="id">7</attr>
+<attr id="pos">7</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">RTS_7</alias>
+</variables>
+</item>
+<item>
+<text>Wenn ich das Gefühl habe, eine Begegnung mit jemandem sei schlecht verlaufen, dann neige ich dazu, mir vorzustellen, wie ich mich in verschiedenen Szenen anders hätte verhalten können.</text>
+<attributes.specific program="ofb">
+<attr id="id">8</attr>
+<attr id="pos">8</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">RTS_8</alias>
+</variables>
+</item>
+<item>
+<text>Wenn ich versuche, ein schwieriges Problem zu lösen, bemerke ich, wie ich immer wieder an den Anfang zurückkehre, ohne jemals eine Lösung zu finden.</text>
+<attributes.specific program="ofb">
+<attr id="id">9</attr>
+<attr id="pos">9</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">RTS_9</alias>
+</variables>
+</item>
+<item>
+<text>Ich war noch nie in der Lage, unerwünschte Gedanken links liegen zu lassen.</text>
+<attributes.specific program="ofb">
+<attr id="id">10</attr>
+<attr id="pos">10</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">RTS_10</alias>
+</variables>
+</item>
+<item>
+<text>Selbst wenn ich mehrere Stunden über ein Problem nachdenke, habe ich Schwierigkeiten, es vollständig zu verstehen.</text>
+<attributes.specific program="ofb">
+<attr id="id">11</attr>
+<attr id="pos">11</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">RTS_11</alias>
+</variables>
+</item>
+<item>
+<text>Es ist sehr schwierig für mich, für gewisse Probleme eine klare Lösung zu finden, egal wie lange ich darüber nachdenke.</text>
+<attributes.specific program="ofb">
+<attr id="id">12</attr>
+<attr id="pos">12</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">RTS_12</alias>
+</variables>
+</item>
+<item>
+<text>Manchmal ertappe ich mich dabei, wie ich mehrere Stunden dagesessen und über etwas nachgedacht habe.</text>
+<attributes.specific program="ofb">
+<attr id="id">13</attr>
+<attr id="pos">13</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">RTS_13</alias>
+</variables>
+</item>
+<item>
+<text>Wenn ich ein aufregendes Ereignis vor mir habe, stören mich diesbezügliche Gedanken bei meiner gegenwärtigen Arbeit.</text>
+<attributes.specific program="ofb">
+<attr id="id">14</attr>
+<attr id="pos">14</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">RTS_14</alias>
+</variables>
+</item>
+<item>
+<text>Wenn ein wichtiges Ereignis bevorsteht, kann ich nicht aufhören, darüber nachzudenken.</text>
+<attributes.specific program="ofb">
+<attr id="id">15</attr>
+<attr id="pos">15</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">RTS_15</alias>
+</variables>
+</item>
+</question>
+</section>
+<section>
+<title>bias_select</title>
+<attributes.specific program="ofb">
+<attr id="id">BN</attr>
+<attr id="pos">10</attr>
+</attributes.specific>
+<question>
+<description>bias_select</description>
+<class>dropdown</class>
+<title>
+<![CDATA[<div align="center" style="padding: 0px 0px 12px;"><h1>Fragen zur Aufgabe zu Helligkeitsunterschieden</h1></div>
+
+<p>Bitte wählen Sie die Helligkeit aus, die Ihnen besonders ins Auge stach.</p>]]>
+</title>
+<explanation />
+<inputPosition>right</inputPosition>
+<order>default</order>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+<attr id="number">no</attr>
+<attr id="restrictions.answered">yes</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">bias_select</alias>
+</variables>
+<item>
+<text>Dunkel</text>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+</attributes.specific>
+</item>
+<item>
+<text>Hell</text>
+<attributes.specific program="ofb">
+<attr id="id">2</attr>
+<attr id="pos">2</attr>
+</attributes.specific>
+</item>
+</question>
+</section>
+<section>
+<title>bias</title>
+<attributes.specific program="ofb">
+<attr id="id">BI</attr>
+<attr id="pos">11</attr>
+</attributes.specific>
+<question>
+<description>bias</description>
+<class>scale</class>
+<title>Bitte geben Sie an, zu welchem Grad Sie der nachfolgenden Aussage zustimmen.</title>
+<explanation />
+<inputPosition>right</inputPosition>
+<labels>
+<li i="1"><![CDATA[<b>1<br>stimme gar nicht zu</b>]]></li>
+<li i="2"><![CDATA[<b>2<br><br><br></b>]]></li>
+<li i="3"><![CDATA[<b>3<br><br><br></b>]]></li>
+<li i="4"><![CDATA[<b>4<br><br><br></b>]]></li>
+<li i="5"><![CDATA[<b>5<br><br><br></b>]]></li>
+<li i="6"><![CDATA[<b>6<br><br><br></b>]]></li>
+<li i="7"><![CDATA[<b>7<br><br><br></b>]]></li>
+<li i="8"><![CDATA[<b>8<br><br><br></b>]]></li>
+<li i="9"><![CDATA[<b>9<br><br><br></b>]]></li>
+<li i="10"><![CDATA[<b>10<br>stimme voll und ganz zu</b>]]></li>
+<li i="11"><![CDATA[<b>100 %</b>]]></li>
+</labels>
+<order>default</order>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+<attr id="scale.display">complete</attr>
+<attr id="number">no</attr>
+<attr id="scale.niveau">10</attr>
+<attr id="restrictions.answered">yes</attr>
+<attr id="composition">default</attr>
+</attributes.specific>
+<item>
+<text>Mir stach eine Helligkeit besonders ins Auge.</text>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">bias</alias>
+</variables>
+</item>
+</question>
+</section>
+<section>
+<title>bias_strategy</title>
+<attributes.specific program="ofb">
+<attr id="id">BS</attr>
+<attr id="pos">12</attr>
+</attributes.specific>
+<question>
+<description>bias_strategy</description>
+<class>scale</class>
+<title>
+<![CDATA[<div align="center" style="padding: 0px 0px 12px;"><h1>Fragen zur Aufgabe zu Helligkeitsunterschieden</h1></div>
+<p>Bitte geben Sie an, zu welchem Grad Sie der nachfolgenden Aussage zustimmen.</p>]]>
+</title>
+<explanation />
+<inputPosition>right</inputPosition>
+<labels>
+<li i="1"><![CDATA[<b>1<br>stimme gar nicht zu</b>]]></li>
+<li i="2"><![CDATA[<b>2<br><br><br></b>]]></li>
+<li i="3"><![CDATA[<b>3<br><br><br></b>]]></li>
+<li i="4"><![CDATA[<b>4<br><br><br></b>]]></li>
+<li i="5"><![CDATA[<b>5<br><br><br></b>]]></li>
+<li i="6"><![CDATA[<b>6<br><br><br></b>]]></li>
+<li i="7"><![CDATA[<b>7<br><br><br></b>]]></li>
+<li i="8"><![CDATA[<b>8<br><br><br></b>]]></li>
+<li i="9"><![CDATA[<b>9<br><br><br></b>]]></li>
+<li i="10"><![CDATA[<b>10<br>stimme voll und ganz zu</b>]]></li>
+<li i="11"><![CDATA[<b>100 %</b>]]></li>
+</labels>
+<order>default</order>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+<attr id="scale.display">complete</attr>
+<attr id="number">no</attr>
+<attr id="scale.niveau">10</attr>
+<attr id="restrictions.answered">yes</attr>
+<attr id="composition">default</attr>
+</attributes.specific>
+<item>
+<text>Mir stach „%helligkeit1%“ besonders ins Auge. Deshalb habe ich im Zweifelsfall „%helligkeit2%“ gewählt.</text>
+<attributes.specific program="ofb">
+<attr id="id">1</attr>
+<attr id="pos">1</attr>
+</attributes.specific>
+<variables>
+<alias ix="0">bias_strategy</alias>
+</variables>
+</item>
+</question>
+</section>
+<surveyLayout version="2.4" program="oFb" progversion="3.4.16 1344">
+<name>neutral</name>
+<title>SoSci Survey Neutral</title>
+<template>
+<![CDATA[<!DOCTYPE html>
+<html>
+<head>
+%head%
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style type="text/css">
+body { padding-bottom: 20px }
+div.questionary { min-width: 320px; max-width: %width%; padding: 0 10px; margin: 0 auto; box-sizing: border-box; }
+div#s2t-logo { margin-top: 18px }
+img.s2-logo { max-width: 100%; vertical-align: top }
+div#s2t-progress { width: 200px; float: right; margin: 0 0 20px 32px }
+.buttonControl { padding-top: 0; padding-bottom: 16px }
+div.progressbar { height: 20px; border-color: #AAAAAA }
+div.progressbar div.progresstext { top: 4px }
+hr { height: 2px; border: 0px; background-color: transparent; border-bottom: 2px solid %color.4%; margin: 24px 0px 28px 0px; }
+a { text-decoration: none; }
+
+/* Center footer on smartphone */
+@media (max-width: 450px) {
+  div#s2t-controls { text-align: center }
+  div#s2t-progress { left: 0; right: 0; margin: 0 auto 10px auto; float: none }
+  div#s2t-footer{ text-align: center }
+}
+
+/* No auto-zoom on iOS smartphones */
+@media screen and (-webkit-min-device-pixel-ratio:0) and (max-device-width:1024px) { 
+  select,
+  textarea,
+  input[type="text"],
+  input[type="number"],
+  input[type="password"] { font-size: 16px }
+}
+</style>
+</head>
+<body>
+<div class="questionary">
+  <div id="s2t-logo">%logo%</div>
+  <hr style="margin-top: 12px;">
+  %form.open%
+  <div id="s2t-content">
+  %questionnaire%
+  </div>
+  <hr style="margin-bottom: 14px;">
+  <div id="s2t-footer">
+    <div id="s2t-progress">%progress%</div>
+    <div id="s2t-controls">
+      %button.control%
+    </div>
+    %imprint%
+  </div>
+  %form.close%
+</div>
+</body>
+</html>]]>
+</template>
+<defaultStatus>yes</defaultStatus>
+<copyright>
+<![CDATA[(c)2005-2015 SoSci Survey
+Standard-Layout für SoSci Survey
+Freigegeben zur Veränderung und Weitergabe]]>
+</copyright>
+<attributes.specific program="ofb">
+<attr id="item.residual.style">border-left: 2px solid %color.4%;</attr>
+<attr id="item.balloon.style">font-size: 10px; margin: 0px 0px 4px 0px;</attr>
+<attr id="item.dots.style">margin-left: 16px; text-indent: -16px;</attr>
+<attr id="input.balloon.style">font-size: 11px; border: 1px solid %color.4%;</attr>
+<attr id="input.scale.vertical-align">middle</attr>
+<attr id="color.3">EEEEEE</attr>
+<attr id="color.4">CCCCCC</attr>
+<attr id="color.5">FFF6C0</attr>
+<attr id="color.6">FF9900</attr>
+<attr id="color.7">DDCCFF</attr>
+<attr id="color.8">605287</attr>
+<attr id="color.link.default">color.8</attr>
+<attr id="color.link.hover">color.6</attr>
+<attr id="spacing.items">12px</attr>
+<attr id="title.style">font-weight: bold; margin-bottom: 0.5em;</attr>
+<attr id="opener.style">font-weight: bold; font-weight: normal; padding: 0px 0px 3px 3px; vertical-align: bottom;</attr>
+<attr id="selectable.backgroundInactive">color.3</attr>
+<attr id="selectable.borderInactive">color.4</attr>
+<attr id="selectable.backgroundSelected">color.5</attr>
+<attr id="selectable.borderSelected">color.6</attr>
+<attr id="selectable.borderAvailable">color.4</attr>
+</attributes.specific>
+</surveyLayout>
+<layoutTexts>
+<layoutText id="default.imprint"><txt lng="ger"><![CDATA[<a href="mailto:j.liss@email.uni-kiel.de">Julia V. Liss, M.Sc.</a>, 
+Universität Kiel – 2023]]></txt></layoutText>
+</layoutTexts>
+<questionnaire>
+<title>Fragebogen</title>
+<attributes.specific program="ofb">
+<attr id="id">base</attr>
+<attr id="content">&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;questionnaire&gt;
+
+&lt;!-- Seite 1 --&gt;
+&lt;page intID=&quot;1&quot;&gt;
+&lt;html intID=&quot;38&quot;&gt;&lt;![CDATA[
+&lt;div align=&quot;center&quot; style=&quot;padding: 0px 0px 12px;&quot;&gt;&lt;h1&gt;Fragen zur Aufgabe zu Helligkeitsunterschieden&lt;/h1&gt;&lt;/div&gt;
+]]&gt;&lt;/html&gt;
+&lt;question id=&quot;UR01&quot; intID=&quot;6&quot; /&gt;
+&lt;question id=&quot;ST01&quot; intID=&quot;2&quot; /&gt;
+&lt;/page&gt;
+
+
+&lt;!-- Seite 2 --&gt;
+&lt;page intID=&quot;3&quot;&gt;
+&lt;html intID=&quot;39&quot;&gt;&lt;![CDATA[
+&lt;div align=&quot;center&quot; style=&quot;padding: 0px 0px 12px;&quot;&gt;&lt;h1&gt;Fragen zur Aufgabe zu Helligkeitsunterschieden&lt;/h1&gt;&lt;/div&gt;
+]]&gt;&lt;/html&gt;
+&lt;question id=&quot;ST02&quot; intID=&quot;24&quot; /&gt;
+&lt;/page&gt;
+
+
+&lt;!-- Seite 3 --&gt;
+&lt;page intID=&quot;49&quot;&gt;
+&lt;html intID=&quot;53&quot;&gt;&lt;![CDATA[
+&lt;div align=&quot;center&quot; style=&quot;padding: 0px 0px 12px;&quot;&gt;&lt;h1&gt;Fragen zur Aufgabe zu Helligkeitsunterschieden&lt;/h1&gt;&lt;/div&gt;
+]]&gt;&lt;/html&gt;
+&lt;question id=&quot;BI01&quot; intID=&quot;51&quot; /&gt;
+&lt;/page&gt;
+
+
+&lt;!-- Seite 4 --&gt;
+&lt;page intID=&quot;52&quot;&gt;
+&lt;info&gt;bias_select&lt;/info&gt;
+&lt;php intID=&quot;50&quot;&gt;&lt;![CDATA[
+if (value(&#039;bias&#039;) &gt; 1) {
+  question(&#039;BN01&#039;);
+}
+]]&gt;&lt;/php&gt;
+&lt;/page&gt;
+
+
+&lt;!-- Seite 5 --&gt;
+&lt;page intID=&quot;54&quot;&gt;
+&lt;info&gt;bias_strategy&lt;/info&gt;
+&lt;php intID=&quot;55&quot;&gt;&lt;![CDATA[
+if (value(&#039;bias&#039;) &gt; 1) {
+    if (value(&#039;bias_select&#039;) == 1) {
+        replace(&#039;%helligkeit1%&#039;, &#039;dunkel&#039;);
+        replace(&#039;%helligkeit2%&#039;, &#039;hell&#039;);
+    } else {
+        replace(&#039;%helligkeit1%&#039;, &#039;hekl&#039;);
+        replace(&#039;%helligkeit2%&#039;, &#039;dunkel&#039;);
+    }
+}
+
+if (value(&#039;bias&#039;) &gt; 1) {
+  question(&#039;BS01&#039;);
+}
+]]&gt;&lt;/php&gt;
+&lt;/page&gt;
+
+
+&lt;!-- Seite 6 --&gt;
+&lt;page intID=&quot;5&quot;&gt;
+&lt;html intID=&quot;40&quot;&gt;&lt;![CDATA[
+&lt;div align=&quot;center&quot; style=&quot;padding: 0px 0px 12px;&quot;&gt;&lt;h1&gt;Fragen zur Aufgabe zu Helligkeitsunterschieden&lt;/h1&gt;&lt;/div&gt;
+]]&gt;&lt;/html&gt;
+&lt;question id=&quot;ST03&quot; intID=&quot;26&quot; /&gt;
+&lt;/page&gt;
+
+
+&lt;!-- Seite 7 --&gt;
+&lt;page intID=&quot;7&quot;&gt;
+&lt;html intID=&quot;41&quot;&gt;&lt;![CDATA[
+&lt;div align=&quot;center&quot; style=&quot;padding: 0px 0px 12px;&quot;&gt;&lt;h1&gt;Fragen zur Aufgabe zu Helligkeitsunterschieden&lt;/h1&gt;&lt;/div&gt;
+]]&gt;&lt;/html&gt;
+&lt;question id=&quot;FB01&quot; intID=&quot;44&quot; /&gt;
+&lt;/page&gt;
+
+
+&lt;!-- Seite 8 --&gt;
+&lt;page intID=&quot;47&quot;&gt;
+&lt;html intID=&quot;48&quot;&gt;&lt;![CDATA[
+&lt;div align=&quot;center&quot; style=&quot;padding: 0px 0px 12px;&quot;&gt;&lt;h1&gt;Fragen zur Aufgabe zu Helligkeitsunterschieden&lt;/h1&gt;&lt;/div&gt;
+]]&gt;&lt;/html&gt;
+&lt;question id=&quot;PE03&quot; intID=&quot;27&quot; /&gt;
+&lt;/page&gt;
+
+
+&lt;!-- Seite 9 --&gt;
+&lt;page intID=&quot;9&quot;&gt;
+&lt;html intID=&quot;37&quot;&gt;&lt;![CDATA[
+&lt;div align=&quot;center&quot; style=&quot;padding: 0px 0px 12px;&quot;&gt;&lt;h1&gt;Fragen zur Aufgabe zu Helligkeitsunterschieden&lt;/h1&gt;&lt;/div&gt;
+]]&gt;&lt;/html&gt;
+&lt;question id=&quot;DS01&quot; intID=&quot;29&quot; /&gt;
+&lt;/page&gt;
+
+
+&lt;!-- Seite 10 --&gt;
+&lt;page intID=&quot;11&quot;&gt;
+&lt;html intID=&quot;42&quot;&gt;&lt;![CDATA[
+&lt;div align=&quot;center&quot; style=&quot;padding: 0px 0px 12px;&quot;&gt;&lt;h1&gt;Fragen zur Aufgabe zu Helligkeitsunterschieden&lt;/h1&gt;&lt;/div&gt;
+]]&gt;&lt;/html&gt;
+&lt;question id=&quot;DS02&quot; intID=&quot;35&quot; /&gt;
+&lt;/page&gt;
+
+
+&lt;!-- Seite 11 --&gt;
+&lt;page intID=&quot;45&quot;&gt;
+&lt;html intID=&quot;56&quot;&gt;&lt;![CDATA[
+&lt;div align=&quot;center&quot; style=&quot;padding: 0px 0px 12px;&quot;&gt;&lt;h1&gt;Fragen zu Ihrer Person&lt;/h1&gt;&lt;/div&gt;
+]]&gt;&lt;/html&gt;
+&lt;question id=&quot;RT01&quot; intID=&quot;46&quot; /&gt;
+&lt;/page&gt;
+
+
+&lt;!-- Seite 12 --&gt;
+&lt;page intID=&quot;13&quot;&gt;
+&lt;html intID=&quot;43&quot;&gt;&lt;![CDATA[
+&lt;div align=&quot;center&quot; style=&quot;padding: 0px 0px 12px;&quot;&gt;&lt;h1&gt;Fragen zu Ihrer Person&lt;/h1&gt;&lt;/div&gt;
+]]&gt;&lt;/html&gt;
+&lt;question id=&quot;UP01&quot; intID=&quot;36&quot; /&gt;
+&lt;/page&gt;
+
+
+&lt;!-- Seite 13 --&gt;
+&lt;page intID=&quot;15&quot;&gt;
+&lt;html intID=&quot;57&quot;&gt;&lt;![CDATA[
+&lt;div align=&quot;center&quot; style=&quot;padding: 0px 0px 12px;&quot;&gt;&lt;h1&gt;Fragen zu Ihrer Person&lt;/h1&gt;&lt;/div&gt;
+]]&gt;&lt;/html&gt;
+&lt;question id=&quot;DE01&quot; intID=&quot;21&quot; /&gt;
+&lt;/page&gt;
+
+
+&lt;!-- Seite 14 --&gt;
+&lt;page intID=&quot;18&quot;&gt;
+&lt;question id=&quot;DE02&quot; intID=&quot;19&quot; /&gt;
+&lt;/page&gt;
+
+
+&lt;!-- Seite 15 --&gt;
+&lt;page ident=&quot;psycho&quot; intID=&quot;20&quot;&gt;
+&lt;question id=&quot;DE03&quot; intID=&quot;17&quot; /&gt;
+&lt;/page&gt;
+
+
+&lt;!-- Seite 16 --&gt;
+&lt;page ident=&quot;subject&quot; intID=&quot;22&quot;&gt;
+&lt;question id=&quot;DE04&quot; intID=&quot;16&quot; /&gt;
+&lt;/page&gt;
+
+
+&lt;!-- Seite 17 --&gt;
+&lt;page ident=&quot;adult&quot; intID=&quot;25&quot;&gt;
+&lt;question id=&quot;DE05&quot; intID=&quot;12&quot; /&gt;
+&lt;question id=&quot;DE06&quot; intID=&quot;14&quot; /&gt;
+&lt;/page&gt;
+
+
+&lt;!-- Seite 18 --&gt;
+&lt;page intID=&quot;23&quot;&gt;
+&lt;question id=&quot;DE07&quot; intID=&quot;8&quot; /&gt;
+&lt;question id=&quot;DE08&quot; intID=&quot;10&quot; /&gt;
+&lt;/page&gt;
+
+
+&lt;!-- Seite 19 --&gt;
+&lt;page intID=&quot;28&quot;&gt;
+&lt;question id=&quot;DA01&quot; intID=&quot;4&quot; /&gt;
+&lt;/page&gt;
+
+
+&lt;!-- Seite 20 --&gt;
+&lt;page intID=&quot;30&quot;&gt;
+&lt;question id=&quot;DA02&quot; intID=&quot;31&quot; /&gt;
+&lt;question id=&quot;DA03&quot; intID=&quot;32&quot; /&gt;
+&lt;/page&gt;
+
+
+&lt;!-- Seite 21 --&gt;
+&lt;page intID=&quot;33&quot;&gt;
+&lt;info&gt;redirect&lt;/info&gt;
+&lt;php intID=&quot;34&quot;&gt;
+redirect(&#039;https://app.prolific.co/submissions/complete?cc=CL88NOKF&#039;, false);
+&lt;/php&gt;
+&lt;/page&gt;
+
+
+&lt;/questionnaire&gt;</attr>
+<attr id="goodbye">
+<![CDATA[<h1>Vielen Dank für Ihre Teilnahme!</h1>
+
+<p>Wir möchten uns ganz herzlich für Ihre Mithilfe bedanken.</p>
+
+<!-- Hier evtl. noch Zweck der Studie, Ansprechpartner, etc. -->
+ 
+<p>Ihre Antworten wurden gespeichert, Sie können das Browser-Fenster nun schließen.</p>
+
+<!-- Zusätzlicher Abstand (ggf. entfernen/anpassen) -->
+<div style="padding-bottom: 20px"></div>]]>
+</attr>
+<attr id="panelForm">no</attr>
+<attr id="selection">1</attr>
+</attributes.specific>
+</questionnaire>
+</surveyProject>
