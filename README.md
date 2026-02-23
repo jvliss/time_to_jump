@@ -18,7 +18,7 @@ This project combines simulation and experimental approaches to investigate how 
 
 Study 2 files typically use the affix `_s2` (or are located in `s2_*` folders), while Study 1 files do not.
 
-### 1. Introduction (`1_introduction/`)
+### 1. Introduction
 - `density_sample_paths.ipynb`: Visualizes the assumptions of the Lévy-flight model.
 - `density_sample_paths.png`: Output image from the visualization notebook.
 - `alpha_behavior.ipynb`: Simulates α-values and shows how they shape RT distributions.
@@ -26,7 +26,7 @@ Study 2 files typically use the affix `_s2` (or are located in `s2_*` folders), 
 - `simulate_alpha_behavior.pkl`: Pregenerated simulation data.
 - Supporting files necessary to run the simulations.
 
-### 2. Experiment Script (`2_experiment_script/`)
+### 2. Experiment Script
 - Study 1
 	- `lnt.json`: Script for running the letter-number discrimination task in [lab.js](https://labjs.felixhenninger.com/).
 - Study 2
