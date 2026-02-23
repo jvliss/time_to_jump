@@ -1,0 +1,612 @@
+---
+title: "Time to Jump: Study 2"
+date: "February 2026"
+output: 
+  html_document:
+    code_folding: hide
+    toc: TRUE
+    toc_depth: 2
+    toc_float: true
+---
+
+```{r setup, include = F}
+#Load libraries
+library(flextable)
+library(tidyr)
+library(dplyr)
+library(afex)
+library(parameters)
+library(effectsize)
+library(rempsyc)
+library(BayesFactor)
+library(tibble)
+library(purrr)
+
+#Set paths 
+root_path = "your_path"
+path_to_behav = paste0(root_path, "/3_simulators/data/")
+path_to_bf_data = paste0(root_path, "/3_simulators/estimates_param_estim/estimates_ttj_s2_presimulation_250ep_10000it/")
+
+#Functions
+format_bf = function(bf, threshold = 1000, digits = 2) {
+  sapply(bf, function(x) {
+    if (is.na(x)) NA_character_
+    else if (x >= threshold) {
+      exponent = floor(log10(x))
+      mantissa = x / 10^exponent
+      sprintf(paste0("%.", digits, "f×10^%d"), mantissa, exponent)
+    } else {
+      as.character(round(x, digits))
+    }
+  })
+}
+
+format_simple_effects = function(df) {
+  df %>%
+    dplyr::select(Effect, t, df, p, d, BF10) %>%
+    dplyr::mutate(t = round(t, 2), 
+                  p = format.pval(p, digits = 3, eps = 0.001),
+                  d = round(d, 2),
+                  BF10 = format_bf(BF10, threshold = 1000, digits = 2))
+}
+
+anova_with_bf = function(data_long, dv, id = "pp_nr", between, within, bf_specs, es = "ges") {
+  anova_res = afex::aov_ez(id = id, dv = dv, data = data_long,
+                           between = between, within = within, detailed = TRUE, anova_table = list(es = es))
+  
+  bf_models = lapply(bf_specs$models, \(fml) {
+    lmBF(as.formula(fml), data = data_long, whichRandom = id)
+  })
+  
+  bf_vals = vapply(bf_specs$comparisons, \(pair) {
+    num = bf_models[[pair[1]]]
+    den = bf_models[[pair[2]]]
+    extractBF(num / den)$bf
+  }, numeric(1))
+  
+  anova_table = as.data.frame(anova_res$anova_table)
+  anova_table$Effect = rownames(anova_table)
+  
+  summary_table = anova_table %>%
+    dplyr::select(Effect, `num Df`, `den Df`, F, ges, `Pr(>F)`) %>%
+    dplyr::rename(df1 = `num Df`, df2 = `den Df`, p = `Pr(>F)`, ng2 = ges) %>%
+    dplyr::mutate(BF10 = bf_vals[Effect] |> unname(),
+                  F = round(F, 2), ng2 = round(ng2, 3), p = format.pval(p, digits = 3, eps = 0.001), 
+                  BF10 = format_bf(BF10)
+    )
+  list(anova = anova_res, summary = summary_table, bf_models = bf_models)
+}
+
+add_holm = function(df, p_col = "p") {
+  df %>% mutate(!!p_col := p.adjust(.data[[p_col]], method = "holm"))
+}
+
+d_from_t_paired = function(t, n) t / sqrt(n)
+d_from_t_indep = function(t, n1, n2) t * sqrt(1/n1 + 1/n2)
+
+simple_effects_brightness_within_condition = function(data_long, dv, id = "pp_nr",
+                                                      condition_var = "condition", brightness_var = "brightness",
+                                                      conditions = c("control", "explicitDeadline"),
+                                                      brightness_levels = 0:1) {
+  b1 = as.character(brightness_levels[1])
+  b2 = as.character(brightness_levels[2])
+  out = lapply(conditions, function(cond) {
+    df_wide = data_long %>%
+      dplyr::filter(.data[[condition_var]] == cond) %>%
+      dplyr::mutate(!!brightness_var := factor(.data[[brightness_var]], levels = as.character(brightness_levels))) %>%
+      dplyr::select(dplyr::all_of(c(id, brightness_var, dv))) %>%
+      tidyr::pivot_wider(names_from  = dplyr::all_of(brightness_var), values_from = dplyr::all_of(dv)
+      ) %>%
+      dplyr::filter(!is.na(.data[[b1]]), !is.na(.data[[b2]]))
+    if (nrow(df_wide) == 0) {
+      return(tibble::tibble(Effect = paste0("brightness (", b1, " vs ", b2, ") | ", cond),
+                            t = NA_real_, df = NA_real_, p = NA_real_, d = NA_real_,
+                            CI_lower = NA_real_, CI_upper = NA_real_, BF10 = NA_real_, n = 0
+      ))
+    }
+    x = df_wide[[b1]]
+    y = df_wide[[b2]]
+    tt = stats::t.test(x, y, paired = TRUE)
+    n = length(x)
+    d = d_from_t_paired(unname(tt$statistic), n)
+    bf = BayesFactor::ttestBF(x = x, y = y, paired = TRUE)
+    tibble::tibble(
+      Effect   = paste0("brightness (", b1, " vs ", b2, ") | ", cond),
+      t = unname(tt$statistic), df = unname(tt$parameter), p = tt$p.value,
+      d = d, CI_lower = unname(tt$conf.int[1]), CI_upper = unname(tt$conf.int[2]),
+      BF10 = BayesFactor::extractBF(bf)$bf, n = n
+    )
+  })
+  dplyr::bind_rows(out)
+}
+
+simple_effects_condition_within_brightness = function(data_long, dv, condition_var = "condition", brightness_var = "brightness", brightness_levels = 0:1,
+                                                      condition_levels = c("control", "explicitDeadline")) {
+  out = lapply(brightness_levels, function(br) {
+    dfb = data_long %>%
+      dplyr::filter(.data[[brightness_var]] == br) %>%
+      dplyr::mutate(
+        !!condition_var := factor(.data[[condition_var]], levels = condition_levels)
+      )
+    x = dfb %>% dplyr::filter(.data[[condition_var]] == condition_levels[1]) %>% dplyr::pull(all_of(dv))
+    y = dfb %>% dplyr::filter(.data[[condition_var]] == condition_levels[2]) %>% dplyr::pull(all_of(dv))
+    tt = stats::t.test(x, y, paired = FALSE, var.equal = TRUE)
+    n1 = sum(!is.na(x)); n2 = sum(!is.na(y))
+    d = d_from_t_indep(unname(tt$statistic), n1, n2)
+    bf = BayesFactor::ttestBF(x = x, y = y, paired = FALSE)
+    tibble::tibble(
+      Effect = paste0("condition (", condition_levels[1], " vs ", condition_levels[2], ") | ", br),
+      t = unname(tt$statistic), df = unname(tt$parameter), p = tt$p.value,
+      d = d, CI_lower = unname(tt$conf.int[1]), CI_upper = unname(tt$conf.int[2]),
+      BF10 = BayesFactor::extractBF(bf)$bf
+    )
+  })
+  dplyr::bind_rows(out)
+}
+
+simple_effects_correctness_within_condition = function(data_long, dv="rt", id = "pp_nr", correctness_var = "correctness",
+                                                       correctness_levels = c("correct", "incorrect")) {
+  c1 = as.character(correctness_levels[2])
+  c2 = as.character(correctness_levels[1])
+  
+  df_wide_control = data_long %>%
+    dplyr::filter(condition == "control") %>%
+    dplyr::group_by(!!rlang::sym(id), !!rlang::sym(correctness_var)) %>%
+    dplyr::summarise(rt_mean = mean(!!rlang::sym(dv), na.rm = TRUE), .groups = "drop") %>%
+    tidyr::pivot_wider(
+      names_from  = dplyr::all_of(correctness_var),
+      values_from = rt_mean
+    )
+  
+  x_ctrl = df_wide_control[[c1]]
+  y_ctrl = df_wide_control[[c2]]
+  
+  tt_ctrl = stats::t.test(x_ctrl, y_ctrl, paired = TRUE)
+  n_ctrl = length(x_ctrl)
+  d_ctrl = d_from_t_paired(unname(tt_ctrl$statistic), n_ctrl)
+  bf_ctrl = BayesFactor::ttestBF(x = x_ctrl, y = y_ctrl, paired = TRUE)
+  
+  df_wide_deadline = data_long %>%
+    dplyr::filter(condition == "explicitDeadline") %>%
+    dplyr::group_by(!!rlang::sym(id), !!rlang::sym(correctness_var)) %>%
+    dplyr::summarise(rt_mean = mean(!!rlang::sym(dv), na.rm = TRUE), .groups = "drop") %>%
+    tidyr::pivot_wider(names_from  = dplyr::all_of(correctness_var), values_from = rt_mean)
+  
+  x_dead = df_wide_deadline[[c1]]
+  y_dead = df_wide_deadline[[c2]]
+  
+  tt_dead = stats::t.test(x_dead, y_dead, paired = TRUE)
+  n_dead = length(x_dead)
+  d_dead = d_from_t_paired(unname(tt_dead$statistic), n_dead)
+  bf_dead = BayesFactor::ttestBF(x = x_dead, y = y_dead, paired = TRUE)
+  
+  dplyr::bind_rows(
+    tibble::tibble(
+      Effect = paste0("correctness (", c1, " vs ", c2, ") | control"),
+      t = unname(tt_ctrl$statistic), df = unname(tt_ctrl$parameter), p = tt_ctrl$p.value,
+      d = d_ctrl, CI_lower = unname(tt_ctrl$conf.int[1]), CI_upper = unname(tt_ctrl$conf.int[2]),
+      BF10 = BayesFactor::extractBF(bf_ctrl)$bf, n = n_ctrl),
+    tibble::tibble(
+      Effect = paste0("correctness (", c1, " vs ", c2, ") | explicitDeadline"),
+      t = unname(tt_dead$statistic), df = unname(tt_dead$parameter), p = tt_dead$p.value,
+      d = d_dead, CI_lower = unname(tt_dead$conf.int[1]), CI_upper = unname(tt_dead$conf.int[2]),
+      BF10 = BayesFactor::extractBF(bf_dead)$bf, n = n_dead)
+  )
+}
+
+simple_effects_brightness_within_condition = function(data_long, dv="rt", id = "pp_nr", brightness_var = "brightness", brightness_levels = 0:1) {
+  b1 = as.character(brightness_levels[1])
+  b2 = as.character(brightness_levels[2])
+  
+  df_wide_control = data_long %>%
+    dplyr::filter(condition == "control") %>%
+    dplyr::group_by(!!rlang::sym(id), !!rlang::sym(brightness_var)) %>%
+    dplyr::summarise(rt_mean = mean(!!rlang::sym(dv), na.rm = TRUE), .groups = "drop") %>%
+    tidyr::pivot_wider(names_from  = dplyr::all_of(brightness_var), values_from = rt_mean)
+  
+  x_ctrl = df_wide_control[[b1]]
+  y_ctrl = df_wide_control[[b2]]
+  
+  tt_ctrl = stats::t.test(x_ctrl, y_ctrl, paired = TRUE)
+  n_ctrl = length(x_ctrl)
+  d_ctrl = d_from_t_paired(unname(tt_ctrl$statistic), n_ctrl)
+  bf_ctrl = BayesFactor::ttestBF(x = x_ctrl, y = y_ctrl, paired = TRUE)
+  
+  df_wide_deadline = data_long %>%
+    dplyr::filter(condition == "explicitDeadline") %>%
+    dplyr::group_by(!!rlang::sym(id), !!rlang::sym(brightness_var)) %>%
+    dplyr::summarise(rt_mean = mean(!!rlang::sym(dv), na.rm = TRUE), .groups = "drop") %>%
+    tidyr::pivot_wider(names_from  = dplyr::all_of(brightness_var), values_from = rt_mean)
+  
+  x_dead = df_wide_deadline[[b1]]
+  y_dead = df_wide_deadline[[b2]]
+  
+  tt_dead = stats::t.test(x_dead, y_dead, paired = TRUE)
+  n_dead = length(x_dead)
+  d_dead = d_from_t_paired(unname(tt_dead$statistic), n_dead)
+  bf_dead = BayesFactor::ttestBF(x = x_dead, y = y_dead, paired = TRUE)
+  
+  dplyr::bind_rows(
+    tibble::tibble(
+      Effect = paste0("brightness (", b1, " vs ", b2, ") | control"),
+      t = unname(tt_ctrl$statistic), df = unname(tt_ctrl$parameter), p = tt_ctrl$p.value,
+      d = d_ctrl, CI_lower = unname(tt_ctrl$conf.int[1]), CI_upper = unname(tt_ctrl$conf.int[2]),
+      BF10 = BayesFactor::extractBF(bf_ctrl)$bf, n = n_ctrl),
+    tibble::tibble(
+      Effect = paste0("brightness (", b1, " vs ", b2, ") | explicitDeadline"), 
+      t = unname(tt_dead$statistic), df = unname(tt_dead$parameter), p = tt_dead$p.value,
+      d = d_dead, CI_lower = unname(tt_dead$conf.int[1]), CI_upper = unname(tt_dead$conf.int[2]),
+      BF10 = BayesFactor::extractBF(bf_dead)$bf, n = n_dead)
+  )
+}
+
+cohens_d_xy = function(x, y) {
+  x = x[is.finite(x)]
+  y = y[is.finite(y)]
+  n1 = length(x); n2 = length(y)
+  s1 = sd(x); s2 = sd(y)
+  m1 = mean(x); m2 = mean(y)
+  sp = sqrt(((n1 - 1) * s1^2 + (n2 - 1) * s2^2) / (n1 + n2 - 2))
+  (m1 - m2) / sp
+}
+
+bf10_xy = function(x, y, rscale = "medium") {
+  x = x[is.finite(x)]
+  y = y[is.finite(y)]
+  if (length(x) < 2 || length(y) < 2) return(NA_real_)
+  bf_obj = BayesFactor::ttestBF(x = x, y = y, rscale = rscale)
+  as.data.frame(bf_obj)$bf[1]
+}
+```
+
+```{r load_data, include=F}
+#Load behav
+file_name = paste0(path_to_behav, "ttj_s2_result_empirical_wsy.csv")
+behav = read.csv(file_name)
+
+quantiles = c("X0.1", "X0.3", "X0.7", "X0.9", "X0.25", "X0.5", "X0.75")
+measure_vars = c("accuracy", "meanRT_correct", "meanRT_incorrect", "meanRTlog_correct", "meanRTlog_incorrect",
+                 paste0(quantiles, "_correct"), paste0(quantiles, "_incorrect"),
+                 "skew_correct", "stdRT_correct", "skew_incorrect", "stdRT_incorrect", "timeout",
+                 "n_trials", "prop_fast_errors", "meanRTdiff", "meanRTlogdiff")
+
+behav = behav %>% mutate(symbol = as.character(symbol)) %>%
+  tidyr::pivot_wider(id_cols = c(pp, cond, origin, model), names_from = symbol, values_from = all_of(measure_vars), names_glue = "{.value}_s{symbol}")
+behav = behav %>% dplyr::rename(pp_nr = pp, condition = cond)
+behav = behav %>% dplyr::mutate(across(c("pp_nr", "condition"), factor))
+behav[which(behav$condition=="control"), c("timeout_s0", "timeout_s1")] = NA
+
+#Load param
+prior_contexts = c("levy")
+simulator_contexts = c("no_deadline")
+bf_estimates = NULL
+for (p in prior_contexts) {
+  for (s in simulator_contexts) {
+    estimates_path = sprintf("%sestimates_net1_%s_%s.csv", path_to_bf_data, p, s)
+    df = read.csv(estimates_path)
+    df$prior = p
+    df$simulator = s
+    bf_estimates = rbind(bf_estimates, df)
+  }
+}
+bf_estimates$model = ifelse(bf_estimates$prior=="levy", "Lévy-flight model", "Diffusion model")
+bf_estimates$v_both = (bf_estimates$v1 + c(bf_estimates$v0*-1))/2
+bf_estimates$v0 = bf_estimates$v0*-1
+
+bf_estimates$condition = factor(bf_estimates$condition, levels=c("control", "explicitDeadline"), ordered = T)
+```
+
+# Behavioral Variables 
+
+```{r desc_behav_ws}
+behav_base = c("meanRT_correct", "meanRT_incorrect", "accuracy", 
+                "skew_correct", #"skew_incorrect", 
+                "timeout")
+behav_vars = c(paste0(behav_base, "_s0"), paste0(behav_base, "_s1"))
+behav_vars = sort(behav_vars)
+summary_df = behav %>% 
+  dplyr::group_by(condition) %>% 
+  dplyr::summarise(across(all_of(behav_vars),
+                          list(mean = ~ mean(.x, na.rm = TRUE), sd   = ~ sd(.x, na.rm = TRUE)), 
+                          .names = "{.col}_{.fn}"), .groups = "drop"
+                   )
+
+summary_long = summary_df %>% 
+  tidyr::pivot_longer(cols = -condition, names_to = c("variable", "stat"), names_pattern = "(.*)_(mean|sd)") %>% 
+  tidyr::pivot_wider(names_from = c(condition, stat), values_from = value, names_sep = "_") %>%
+  dplyr::mutate(across(where(is.numeric), ~ sprintf("%.2f", .x)))
+
+conditions = unique(behav$condition)
+
+ft = flextable::flextable(summary_long) %>% 
+  flextable::set_header_labels(variable = "Variable", control_mean = "M", control_sd = "SD", explicitDeadline_mean = "M", explicitDeadline_sd = "SD") %>%
+  flextable::add_header_row(values = c("", "Control", "Deadline"), colwidths = c(1, 2, 2)) %>%
+  flextable::autofit()
+ft
+```
+
+```{r desc_behav_wos, include=F}
+behav_collapsed = behav
+for (v in c("meanRT_correct", "meanRT_incorrect", "accuracy", "skew_correct", "skew_incorrect", "timeout")) {
+  cols = c(paste0(v, "_s0"), paste0(v, "_s1"))
+  behav_collapsed[[v]] = rowMeans(behav_collapsed[, cols], na.rm = TRUE)
+}
+
+summary_df = behav_collapsed %>%
+  dplyr::group_by(condition) %>%
+  dplyr::summarise(across(all_of(behav_base), list(mean = ~ mean(.x, na.rm = TRUE), sd = ~ sd(.x, na.rm = TRUE)), .names = "{.col}_{.fn}"), .groups = "drop")
+
+summary_long = summary_df %>%
+  tidyr::pivot_longer(cols = -condition, names_to = c("variable", "stat"), names_pattern = "(.*)_(mean|sd)") %>%
+  tidyr::pivot_wider(names_from  = c(condition, stat), values_from = value, names_sep = "_") %>%
+  dplyr::mutate(across(where(is.numeric), ~ sprintf("%.2f", .x)))
+
+cond_levels = unique(as.character(behav$condition))
+
+ft = flextable::flextable(summary_long) %>%
+  flextable::set_header_labels(variable = "Measure", control_mean = "M", control_sd = "SD", explicitDeadline_mean = "M", explicitDeadline_sd = "SD") %>%
+  flextable::add_header_row(values = c("", "Control", "Deadline"), colwidths = c(1, 2, 2)) %>%
+  flextable::autofit() 
+ft
+```
+
+## Mean Response Times
+
+```{r meanRT, include=T, warning=F, message=F}
+set.seed(22032000)
+behav_long_rt = behav %>%
+  dplyr::select(pp_nr, condition, meanRT_correct_s0, meanRT_correct_s1, meanRT_incorrect_s0, meanRT_incorrect_s1,) %>%
+  tidyr::pivot_longer(cols = starts_with("meanRT"), 
+                      names_to = c("correctness", "brightness"), names_pattern = "meanRT_(correct|incorrect)_s(0|1)",
+                      values_to = "rt") %>%
+  dplyr::mutate(correctness = factor(correctness, levels = c("correct", "incorrect")),
+                brightness = factor(brightness,  levels = 0:1), condition = factor(condition))
+bf_specs_rt = list(
+  models = list(
+    intercept = "rt ~ pp_nr",
+    condition = "rt ~ condition + pp_nr",
+    correctness = "rt ~ correctness + pp_nr",
+    brightness = "rt ~ brightness + pp_nr",
+    main_all = "rt ~ condition + correctness + brightness + pp_nr",
+    cond_corr = "rt ~ condition + correctness + brightness + condition:correctness + pp_nr",
+    cond_bright = "rt ~ condition + correctness + brightness + condition:brightness + pp_nr",
+    corr_bright = "rt ~ condition + correctness + brightness + correctness:brightness + pp_nr",
+    all_2way = "rt ~ condition + correctness + brightness + condition:correctness + condition:brightness + correctness:brightness + pp_nr",
+    full = "rt ~ condition * correctness * brightness + pp_nr"),
+  comparisons = list(condition = c("condition", "intercept"),
+                     correctness = c("correctness", "intercept"),
+                     `condition:correctness` = c("cond_corr", "main_all"),
+                     brightness = c("brightness", "intercept"),
+                     `condition:brightness` = c("cond_bright", "main_all"),
+                     `correctness:brightness` = c("corr_bright", "main_all"),
+                     `condition:correctness:brightness` = c("full", "all_2way")))
+
+rt_out = anova_with_bf(data_long = behav_long_rt, dv = "rt", between = "condition",  within = c("correctness", "brightness"), bf_specs = bf_specs_rt)
+rt_out_summary = rt_out$summary
+rt_out_summary = rt_out_summary[c(1, 4, 2, 5, 3, 6, 7), ]
+#print(rt_out$summary)
+
+ft_rt_anova = rt_out$summary %>% dplyr::mutate(Effect = gsub(":", " × ", Effect), df = paste0(df1, ", ", df2)) %>%
+  dplyr::select(Effect, df, F, ng2, p, BF10) %>%
+  flextable::flextable() %>%
+  flextable::set_header_labels(Effect = "effect", df = "df", F = "F", ng2 = "η²G", p = "p", BF10 = "BF10") %>%
+  flextable::autofit() %>%
+  flextable::set_caption("Three-Way ANOVA: Mean Response Time")
+ft_rt_anova
+
+rt_posthoc_corr_in_cond = simple_effects_correctness_within_condition(data_long = behav_long_rt)
+rt_posthoc_bright_in_cond = simple_effects_brightness_within_condition(data_long = behav_long_rt)
+rt_posthoc_all = dplyr::bind_rows(rt_posthoc_corr_in_cond, rt_posthoc_bright_in_cond) %>% add_holm() %>% format_simple_effects()
+
+ft_rt_posthoc = rt_posthoc_all %>% flextable::flextable() %>% 
+  flextable::set_header_labels(Effect = "Simple Effect", t = "t", df = "df", p = "p", d = "d", BF10 = "BF10") %>%
+  flextable::autofit() %>%
+  flextable::set_caption("Simple Effects for Mean Response Time")
+ft_rt_posthoc
+```
+
+## Accuracy Rate
+
+```{r acc, include=T, warning=F, message=F}
+set.seed(10101997)
+behav_long_acc = behav %>%
+  dplyr::select(pp_nr, condition, accuracy_s0, accuracy_s1) %>%
+  tidyr::pivot_longer(cols = starts_with("accuracy"), names_to = "brightness", names_pattern = "accuracy_s(0|1)", values_to = "acc") %>%
+  dplyr::mutate(brightness = factor(brightness, levels = 0:1), condition  = factor(condition))
+
+bf_specs_acc = list(models = 
+                      list(intercept = "acc ~ pp_nr",
+                           condition = "acc ~ condition + pp_nr",
+                           brightness = "acc ~ brightness + pp_nr",
+                           main = "acc ~ condition + brightness + pp_nr",
+                           full = "acc ~ condition * brightness + pp_nr"),
+                    comparisons = list(condition = c("condition", "intercept"), brightness = c("brightness", "intercept"), `condition:brightness` = c("full", "main")))
+
+acc_out = anova_with_bf(data_long = behav_long_acc, dv = "acc", between = "condition", within = "brightness", bf_specs = bf_specs_acc)
+acc_out_summary = acc_out$summary
+#print(rt_out$summary)
+ft_acc_anova = acc_out_summary %>%
+  dplyr::mutate(Effect = gsub(":", " × ", Effect), df = paste0(df1, ", ", df2)) %>%
+  dplyr::select(Effect, df, F, ng2, p, BF10) %>%
+  flextable::flextable() %>%
+  flextable::set_header_labels(Effect = "effect", df = "df", F = "F", ng2 = "η²G", p = "p", BF10 = "BF10") %>%
+  flextable::align(align = "left",  part = "all", j = 1) %>%
+  flextable::autofit() %>%
+  flextable::set_caption("Two-Way ANOVA: Accuracy Rate")
+ft_acc_anova
+
+se_brightness_in_cond_acc = simple_effects_brightness_within_condition(data_long = behav_long_acc, dv = "acc") %>%
+  add_holm(p_col = "p") %>% format_simple_effects()
+se_condition_in_bright_acc = simple_effects_condition_within_brightness(data_long = behav_long_acc, dv = "acc") %>%
+  add_holm(p_col = "p") %>% format_simple_effects()
+se_acc = rbind(se_condition_in_bright_acc, se_brightness_in_cond_acc)
+
+ft_acc_simple = se_acc %>% flextable::flextable() %>%
+  flextable::set_header_labels(Effect = "simple effect", t = "t", df = "df", p = "p", d = "d", BF10 = "BF10") %>% 
+  flextable::autofit() %>%
+  flextable::set_caption("Simple Effects: Accuracy Rate")
+ft_acc_simple
+```
+
+## Skewness
+
+```{r skew, include=T, warning=F, message=F}
+behav_long_skew = behav %>%
+  dplyr::select(pp_nr, condition, skew_correct_s0, skew_correct_s1) %>%
+  tidyr::pivot_longer(cols = starts_with("skew"), names_to = "brightness", names_pattern = "skew_correct_s(0|1)", values_to = "skew") %>%
+  dplyr::mutate(brightness = factor(brightness, levels = 0:1), condition  = factor(condition))
+
+bf_specs_skew = list(models = list(intercept = "skew ~ pp_nr",
+                                   condition = "skew ~ condition + pp_nr",
+                                   brightness = "skew ~ brightness + pp_nr",
+                                   main = "skew ~ condition + brightness + pp_nr",
+                                   full = "skew ~ condition * brightness + pp_nr"),
+                     comparisons = list(condition = c("condition", "intercept"), brightness = c("brightness", "intercept"), `condition:brightness` = c("full", "main")))
+
+skew_out = anova_with_bf(data_long = behav_long_skew, dv = "skew", between = "condition", within = "brightness", bf_specs = bf_specs_skew)
+skew_out_summary = skew_out$summary
+#print(rt_out$summary)
+
+ft_skew_anova = skew_out_summary %>%
+  dplyr::mutate(Effect = gsub(":", " × ", Effect), df = paste0(df1, ", ", df2)) %>%
+  dplyr::select(Effect, df, F, ng2, p, BF10) %>%
+  flextable::flextable() %>%
+  flextable::set_header_labels(Effect = "effect", df = "df", F = "F", ng2 = "η²G", p = "p", BF10 = "BF10") %>%
+  flextable::autofit() %>%
+  flextable::set_caption("Two-Way ANOVA: Skewness")
+ft_skew_anova
+
+se_brightness_in_cond_skew = simple_effects_brightness_within_condition(data_long = behav_long_skew, dv = "skew") %>%
+  add_holm(p_col = "p") %>% format_simple_effects()
+se_condition_in_bright_skew = simple_effects_condition_within_brightness(data_long = behav_long_skew, dv = "skew") %>%
+  add_holm(p_col = "p") %>% format_simple_effects()
+se_skew = rbind(se_condition_in_bright_skew, se_brightness_in_cond_skew)
+
+ft_skew_simple = se_skew %>% flextable::flextable() %>%
+  flextable::set_header_labels(Effect = "simple effect", t = "t", df = "df", p = "p", d = "d", BF10 = "BF10") %>% 
+  flextable::autofit() %>%
+  flextable::set_caption("Simple Effects: Skewness")
+ft_skew_simple
+```
+
+# Parameter Estimates
+## Directional Hypothesis
+
+```{r test_directional_alpha, include=T, warning=F, message=F}
+set.seed(14061965)
+#Test control > explicit
+bf1 = BayesFactor::anovaBF(alpha ~ condition, data = bf_estimates)
+samples = BayesFactor::posterior(bf1, iterations = 10000)
+consistent = (samples[, "condition-control"] > samples[, "condition-explicitDeadline"])
+N_consistent = sum(consistent)
+bf_restriction_against_full = (N_consistent / 10000) / (1 / 2)
+bf_full_against_null = as.vector(bf1)
+bf_restriction_against_null = bf_restriction_against_full * bf_full_against_null
+cat("--- BF10 for alpha_control > alpha_explicit ---\n")
+print(bf_restriction_against_null)
+cat("\nProportion consistent:", mean(consistent), "\n")
+```
+
+## Differences Between Groups
+
+```{r params_pairwise_wop, include=T, warning=F, message=F}
+set.seed(14061965)
+params = c("alpha", "a", "zr", "v0", "v1", "t0", "st0", "szr", "sv")
+
+long = bf_estimates %>%
+  dplyr::filter(condition %in% c("control", "explicitDeadline")) %>%
+  dplyr::select(condition, all_of(params)) %>%
+  tidyr::pivot_longer(all_of(params), names_to = "parameter", values_to = "value") %>%
+  dplyr::mutate(condition = factor(condition, levels = c("control", "explicitDeadline")), value = as.numeric(value))
+
+desc = long %>%
+  dplyr::group_by(parameter, condition) %>%
+  dplyr::summarise(M = mean(value, na.rm = TRUE), SD = sd(value, na.rm = TRUE), .groups = "drop") %>%
+  tidyr::pivot_wider(names_from = condition, values_from = c(M, SD), names_glue = "{.value}_{condition}") %>%
+  dplyr::mutate(across(starts_with("M_"),  ~ round(.x, 3)), across(starts_with("SD_"), ~ round(.x, 3)))
+
+df_common = long %>%
+  dplyr::filter(parameter == params[1]) %>%
+  dplyr::summarise(df = sum(is.finite(value) & condition == "control") + sum(is.finite(value) & condition == "explicitDeadline") - 2) %>%
+  dplyr::pull(df)
+
+tests0 = long %>%
+  dplyr::group_by(parameter) %>%
+  dplyr::summarise(x = list(value[condition == "control"]), y = list(value[condition == "explicitDeadline"]), .groups = "drop") %>%
+  dplyr::mutate(t_res = map2(x, y, ~ t.test(.x, .y, var.equal = TRUE)), t = map_dbl(t_res, ~ unname(.x$statistic)), p = map_dbl(t_res, ~ .x$p.value),
+         d = map2_dbl(x, y, cohens_d_xy), BF10 = map2_dbl(x, y, bf10_xy)) %>%
+  dplyr::mutate(t_fmt = formatC(t, format = "f", digits = 2),
+         d_fmt = formatC(d, format = "f", digits = 2),
+         BF10_fmt = format_bf(BF10)) 
+tests = tests0 %>% 
+  dplyr::mutate(signif = case_when(p < .001 ~ "***", p < .01 ~ "**", p < .05 ~ "*", p < .10 ~ "+", TRUE ~ ""),
+                t_fmt = paste0(t_fmt, signif)) %>%
+  dplyr::select(parameter, t_fmt, d_fmt, BF10_fmt)
+
+out = desc %>%
+  dplyr::left_join(tests, by = "parameter") %>%
+  dplyr::arrange(match(parameter, params)) %>%
+  dplyr::rename(Parameter = parameter, t = t_fmt, d = d_fmt, BF10 = BF10_fmt) %>%
+  dplyr::select(Parameter, M_control, SD_control, M_explicitDeadline, SD_explicitDeadline,
+         t, d, BF10)
+out = out %>%
+  dplyr::mutate(across(c(M_control, SD_control, M_explicitDeadline, SD_explicitDeadline,),
+                       ~ case_when(Parameter %in% c("t0", "st0", "szr") ~ formatC(.x, format = "f", digits = 3),
+                                   TRUE                          ~ formatC(.x, format = "f", digits = 2))))
+
+ft = flextable::flextable(out) %>% 
+  flextable::add_header_row(values = c("", "Control Condition", "Explicit Deadline", ""), colwidths = c(1, 2, 2, 3)) %>%
+  flextable::set_header_labels(M_control = "M", SD_control = "SD",
+                    M_explicitDeadline = "M", SD_explicitDeadline = "SD", 
+                    t = paste0("t(", df_common, ")")) %>% 
+  flextable::autofit()
+ft
+```
+
+```{r params_pairwise_wp, include=T, warning=F, message=F}
+tests_wp = tests0 %>%
+  dplyr::mutate(p = dplyr::case_when(is.na(p)  ~ NA_character_, p < 0.001 ~ "<.001", TRUE ~ sub("^0\\.", ".", formatC(as.numeric(p), format="f", digits=3)))) %>%
+  dplyr::select(parameter, t_fmt, p, d_fmt, BF10_fmt)
+out = desc %>%
+  dplyr::left_join(tests_wp, by = "parameter") %>%
+  dplyr::arrange(match(parameter, params)) %>%
+  dplyr::rename(Parameter = parameter, t = t_fmt, d = d_fmt, BF10 = BF10_fmt) %>%
+  dplyr::select(Parameter, M_control, SD_control, M_explicitDeadline, SD_explicitDeadline, t, p, d, BF10)
+out = out %>%
+  dplyr::mutate(across(c(M_control, SD_control, M_explicitDeadline, SD_explicitDeadline,),
+                       ~ case_when(Parameter %in% c("t0", "st0", "szr") ~ formatC(.x, format = "f", digits = 3),
+                                   TRUE ~ formatC(.x, format = "f", digits = 2))))
+
+ft = flextable::flextable(out) %>% 
+  flextable::add_header_row(values = c("", "Control Condition", "Explicit Deadline", ""), colwidths = c(1, 2, 2, 4)) %>%
+  flextable::set_header_labels(M_control = "M", SD_control = "SD",
+                    M_explicitDeadline = "M", SD_explicitDeadline = "SD", 
+                    t = paste0("t(", df_common, ")")) %>% 
+  flextable::autofit()
+ft
+```
+
+# Table
+
+```{r maintext_table, include=T, warning=F, message=F}
+summary_fixed = summary_long %>% 
+  dplyr::rename(parameter = variable, 
+                M_control = control_mean, SD_control = control_sd,
+                M_explicitDeadline = explicitDeadline_mean, SD_explicitDeadline = explicitDeadline_sd)
+desc_fixed = desc %>%
+  dplyr::select(parameter, M_control, SD_control, M_explicitDeadline, SD_explicitDeadline)
+combined = rbind(summary_fixed, desc_fixed)
+combined[5, 2:3] = NA
+combined[, 2:5] <- lapply(combined[, 2:5], as.numeric)
+combined = combined %>%
+  dplyr::mutate(
+    across(c(M_control, SD_control, M_explicitDeadline, SD_explicitDeadline,),
+           ~ case_when(parameter %in% c("t0", "st0") ~ formatC(.x, format = "f", digits = 3),
+                       TRUE ~ formatC(.x, format = "f", digits = 2))))
+
+ft = flextable(combined) %>% 
+  add_header_row(values = c("", "Control Condition", "Explicit Deadline"), colwidths = c(1, 2, 2)) %>%
+  set_header_labels(parameter = "Variable",
+                    M_control = "M", SD_control = "SD", M_explicitDeadline = "M", SD_explicitDeadline = "SD")
+ft
+```
