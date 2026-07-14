@@ -74,7 +74,9 @@ Study 2 files typically use the affix `_s2` (or are located in `s2_*` folders), 
 	- Files used for simulation-based calibration and validation.
 
 ### 4. R Script
-- R scripts for frequentist and Bayesian tests.
+- `ttj_analyses.Rmd`, `ttj_analyses.html`: R Mardown and HTML output file for frequentist and Bayesian tests for Study 1.
+- `ttj_analyses_s2.Rmd`, `ttj_analyses_s2.html`: R Mardown and HTML output file for frequentist and Bayesian tests for Study 2.
+- `appendix_d.Rmd`, `appendix_d.html`: R Mardown and HTML output file for Appendix D.
 
 ---
 
