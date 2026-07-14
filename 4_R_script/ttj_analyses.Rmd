@@ -21,8 +21,9 @@ library(rempsyc)
 library(BayesFactor)
 
 #Set paths 
-path_to_behav = "your_path/simulators/data/"
-path_to_bf_data = "your_path/simulators/estimates_param_estim/estimates_ttj_presimulation_250ep_10000it/"
+root_path = "your_path"
+path_to_behav = paste0(root_path, "/3_simulators/data/")
+path_to_bf_data = paste0(root_path, "/3_simulators/estimates_param_estim/estimates_ttj_presimulation_250ep_10000it/")
 
 #Functions
 fill_df = function(param, df_original) {
