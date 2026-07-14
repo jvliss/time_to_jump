@@ -1,0 +1,787 @@
+---
+title: "Screening for a Separate Fast-Guess Population"
+date: "July 2026"
+output: 
+  html_document:
+    code_folding: hide
+    toc: TRUE
+    toc_depth: 2
+    toc_float: true
+---
+
+# Studies 1 and 2 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+library(tidyverse)
+library(dplyr)
+library(diptest)
+library(patchwork)
+library(knitr)
+library(readxl)
+library(purrr)
+library(ggplot2)
+library(scales)
+library(BayesFactor)
+library(effectsize)
+
+library(extrafont)
+extrafont::loadfonts(device = "all")
+windowsFonts(mono  = "DejaVu Sans", sans = "DejaVu Sans")
+#windowsFonts()
+```
+
+```{r load}
+mardown_path = rstudioapi::getActiveDocumentContext()$path
+root_path = sub("(.*time_to_jump).*", "\\1", mardown_path)
+
+data_path = paste0(root_path, "/3_simulators/data/ttj_raw_data.csv")
+df_all = read.csv(data_path) 
+df_all = df_all[-which(is.na(df_all$rt)), ] #delete timeouts
+df_study1 = df_all %>%
+  dplyr::filter(trial_class == "critical") %>%
+  dplyr::mutate(
+    participant = as.integer(pp_nr),
+    correct = as.integer(correct),
+    symbol = symbol_type,
+    RT = rt/1000,
+    rt_ms = rt
+  ) %>%
+  select(participant, condition, symbol,
+         RT, rt_ms, correct)
+df_study1$study = 1
+df_study1$study_label = "Study 1"
+df_study1$procedural_cutoff_ms = 500
+df_study1$symbol = car::recode(df_study1$symbol, "'letter'=0; 'number'=1")
+
+data_path = paste0(root_path, "/3_simulators/data/ttj_s2_raw_data.csv")
+df_all = read.csv(data_path) 
+df_all = df_all[-which(is.na(df_all$rt)), ] #delete timeouts
+df_study2 = df_all %>%
+  dplyr::filter(trial_class == "test") %>%
+  dplyr::mutate(
+    participant = as.integer(pp_nr),
+    correct = as.integer(correct),
+    symbol = brightness,
+    RT = rt,
+    rt_ms = rt * 1000
+  ) %>%
+  select(participant, condition, symbol,
+         RT, rt_ms, correct)
+df_study2$study = 2
+df_study2$study_label = "Study 2"
+df_study2$procedural_cutoff_ms = 900
+df_study2$symbol = car::recode(df_study2$symbol, "'dark'=0; 'bright'=1")
+
+
+df_all_studies = rbind(df_study1, df_study2)
+```
+
+```{r sanity}
+calc_sanity = function(df) {
+  df %>%
+    dplyr::group_by(study_label, condition) %>%
+    dplyr::summarise(
+      n_subj = n_distinct(participant),
+      n_trials = n(),
+      mean_acc = mean(correct),
+      median_rt = median(rt_ms),
+      .groups = "drop"
+    )
+}
+
+sanity_results = calc_sanity(df_all_studies)
+sanity_results %>% 
+  dplyr::mutate(mean_acc = round(mean_acc, 2), median_rt = round(median_rt, 0)) 
+```
+
+```{r helpers}
+my_cutoff_ms = 300
+my_caf_binwidth = 25
+
+no_leading_zero = function(x) {
+  out = scales::number(x, accuracy = 0.01, trim = TRUE)
+  out = sub("^0\\.", ".", out)
+  out = ifelse(x %% 1 == 0, as.character(as.integer(x)), out)
+  out
+}
+
+bf_one_sample = function(x, mu = 0.5, bf = "01") {
+  if (length(na.omit(x)) < 2) return(NA_real_)
+  bf10 = BayesFactor::extractBF(BayesFactor::ttestBF(x = x, mu = mu), onlybf = TRUE)
+  if (bf == "01") 1 / bf10 else bf10
+}
+
+calc_caf = function(df, binwidth = my_caf_binwidth, min_n = 20) {
+  upper = ceiling(max(df$rt_ms, na.rm = TRUE) / binwidth) * binwidth
+  breaks = seq(0, upper, by = binwidth)
+  df %>% 
+    dplyr::mutate(rt_bin = cut(rt_ms, breaks = breaks)) %>%
+    dplyr::group_by(study_label, procedural_cutoff_ms, condition, rt_bin) %>%
+    dplyr::summarise(
+      mean_rt = mean(rt_ms, na.rm = TRUE),
+      n_correct = sum(correct, na.rm = TRUE),
+      n = dplyr::n(),
+      acc = mean(correct, na.rm = TRUE),
+      .groups = "drop") %>%
+    dplyr::filter(n >= min_n) %>%
+    dplyr::rowwise() %>%
+    dplyr::mutate(
+      ci_low = binom.test(n_correct, n)$conf.int[1],
+      ci_high = binom.test(n_correct, n)$conf.int[2],
+      above_chance = ci_low > 0.5
+    ) %>%
+    dplyr::ungroup()
+}
+
+calc_caf_threshold = function(caf_df) {
+  caf_df %>%
+    dplyr::group_by(study_label, condition) %>%
+    dplyr::filter(above_chance) %>%
+    dplyr::slice_min(mean_rt, n = 1, with_ties = FALSE) %>%
+    dplyr::ungroup() %>%
+    dplyr::select(study_label, condition, mean_rt, n, acc, ci_low, ci_high)
+}
+
+plot_distributions = function(df, plot_title, 
+                              condition_levels, condition_labels, condition_cols, 
+                              xlim_up, binwidth, alpha_value = 0.6) {
+  cutoff_df = df %>%
+    dplyr::distinct(procedural_cutoff_ms)
+  
+  df %>%
+    dplyr::mutate(
+      condition = factor(condition, levels = condition_levels, ordered = TRUE),
+      resp = factor(ifelse(correct == 1, "correct", "incorrect"), levels = c("correct", "incorrect"))) %>%
+    ggplot(aes(x = rt_ms, color = condition, linetype = resp, group = interaction(condition, resp))) +
+    geom_freqpoly(binwidth = binwidth, linewidth = 0.8, alpha = alpha_value) +
+    geom_vline(data = cutoff_df, aes(xintercept = procedural_cutoff_ms), inherit.aes = FALSE,
+               linetype = "dashed", color = "black") +
+    coord_cartesian(xlim = c(0, xlim_up)) +
+    scale_color_manual(name = "Condition", values = setNames(condition_cols, condition_levels), 
+                       breaks = condition_levels, labels = condition_labels) +
+    scale_linetype_manual(name = "Response", values = c("correct" = "solid", "incorrect" = "dashed"), 
+                          labels = c("correct" = "Correct", "incorrect" = "Incorrect")) +
+    guides(color = guide_legend(order = 1, title.position = "top", title.hjust = 0.5, ncol = 1, 
+                                override.aes = list(linetype = "solid")),
+           linetype = guide_legend(order = 2, title.position = "top", title.hjust = 0.5, ncol = 1, 
+                                   override.aes = list(color = "black"))) +
+    labs(title = plot_title, x = "Response Time (ms)", y = "Count") +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.line = element_line(color = "black"),
+          legend.position = c(0.98, 0.98),
+          legend.justification = c("right", "top"),
+          legend.box = "vertical",
+          legend.direction = "vertical",
+          legend.background = element_rect(fill = "white", color = "lightgrey", linewidth = 0.4),
+          legend.box.background = element_blank(),
+          legend.margin = margin(4, 6, 4, 6),
+          legend.box.margin = margin(0, 0, 0, 0))
+}
+```
+
+## RT distributions
+
+```{r distributions}
+p_dist_1 = plot_distributions(
+  df_study1,
+  plot_title = "Study 1",
+  condition_levels = c("acc", "implicitDeadline", "explicitDeadline"),
+  condition_labels = c("Accuracy", "Implicit Deadline", "Explicit Deadline"),
+  condition_cols = c("#6B6B6B", "#6A33A2", "#008080"),
+  xlim_up = 900,
+  binwidth = 10,
+  alpha_value = 0.6
+)
+
+p_dist_2 = plot_distributions(
+  df_study2,
+  plot_title = "Study 2",
+  condition_levels = c("control", "explicitDeadline"),
+  condition_labels = c("Control", "Explicit Deadline"),
+  condition_cols = c("#6B6B6B", "#008080"),
+  xlim_up = 1500,
+  binwidth = 20,
+  alpha_value = 0.6
+)
+
+p_dist_1 
+p_dist_2
+```
+
+## Conditional accuracy functions
+
+```{r caf_compute}
+caf_results_1 = df_all_studies %>%
+  dplyr::filter(study_label == "Study 1") %>%
+  calc_caf(binwidth = my_caf_binwidth, min_n = 20)
+
+caf_results_2 = df_all_studies %>%
+  dplyr::filter(study_label == "Study 2") %>%
+  calc_caf(binwidth = my_caf_binwidth, min_n = 20)
+```
+
+```{r caf_plot}
+plot_caf = function(caf_df, 
+                    condition_levels, condition_labels, condition_cols,
+                    my_linewidth = 0.6,
+                    xlim_up = 1150,
+                    base_font_size = 9,   
+                    title_font_size = 11,  
+                    key_height = 0.8,   
+                    title_gap = -3) {   
+
+  cutoff_df = caf_df %>%
+    dplyr::distinct(procedural_cutoff_ms)
+
+  caf_df %>%
+    dplyr::mutate(
+      condition = factor(
+        condition, 
+        levels = condition_levels, 
+        labels = condition_labels,
+        ordered = TRUE
+      )
+    ) %>%
+    ggplot2::ggplot(
+      ggplot2::aes(
+        x = mean_rt,
+        y = acc,
+        color = condition,
+        fill = condition,
+        linetype = condition,
+        shape = condition
+      )
+    ) +
+    ggplot2::geom_ribbon(
+      ggplot2::aes(ymin = ci_low, ymax = ci_high),
+      alpha = 0.15,
+      color = NA
+    ) +
+    ggplot2::geom_point(size = 1.5) +
+    ggplot2::geom_line(linewidth = my_linewidth, alpha = 1) +
+    ggplot2::geom_hline(
+      yintercept = 0.5,
+      linetype = "longdash",
+      color = "black",
+      linewidth = 0.4
+    ) +
+    ggplot2::geom_vline(
+      data = cutoff_df,
+      ggplot2::aes(xintercept = procedural_cutoff_ms),
+      inherit.aes = FALSE,
+      linetype = "dotted",
+      color = "black",
+      linewidth = 0.4
+    ) +
+    ggplot2::coord_cartesian(xlim = c(0, xlim_up), ylim = c(0, 1)) +
+    ggplot2::scale_y_continuous(labels = no_leading_zero) +
+    ggplot2::scale_color_manual(
+      values = stats::setNames(condition_cols, condition_labels),
+      breaks = condition_labels
+    ) +
+    ggplot2::scale_fill_manual(
+      values = stats::setNames(condition_cols, condition_labels),
+      breaks = condition_labels
+    ) +
+    ggplot2::scale_linetype_manual(
+      values = stats::setNames(rep("solid", length(condition_labels)), condition_labels),
+      breaks = condition_labels
+    ) +
+    ggplot2::scale_shape_manual(
+      values = stats::setNames(rep(16, length(condition_labels)), condition_labels),
+      breaks = condition_labels
+    ) +
+    ggplot2::labs(
+      title = unique(caf_df$study_label),
+      x = "Response Time Bin (ms)",
+      y = "Proportion Correct",
+      color = "Condition",
+      fill = "Condition",
+      linetype = "Condition",
+      shape = "Condition"
+    ) +
+    ggplot2::guides(
+      color = ggplot2::guide_legend(
+        order = 1, title.position = "top", title.hjust = 0.5, ncol = 1,
+        override.aes = list(alpha = 1, linewidth = my_linewidth, size = 1.5)
+      ),
+      fill = "none", linetype = "none", shape = "none"
+    ) +
+    ggplot2::theme_minimal(
+      base_family = "DejaVu Sans",
+      base_size   = base_font_size
+    ) +
+    ggplot2::theme(
+      text = ggplot2::element_text(size = base_font_size),
+      plot.title = ggplot2::element_text(hjust = 0.5, size = title_font_size),
+      axis.title = ggplot2::element_text(size = base_font_size),
+      axis.text  = ggplot2::element_text(size = base_font_size, color = "black"
+      ),
+      panel.grid.major.y = ggplot2::element_blank(),
+      panel.grid.minor.y = ggplot2::element_blank(),
+      panel.grid.major.x = ggplot2::element_blank(),
+      panel.grid.minor.x = ggplot2::element_blank(),
+      axis.line  = ggplot2::element_line(color = "black", linewidth = 0.4),
+      axis.ticks = ggplot2::element_line(color = "black", linewidth = 0.4),
+      legend.position      = c(0.98, 0.1),
+      legend.justification = c("right", "bottom"),
+      legend.direction     = "vertical",
+      legend.box           = "vertical",
+      legend.key.height = grid::unit(key_height, "lines"),
+      legend.key.width  = grid::unit(1.4, "lines"),
+      legend.title = ggplot2::element_text(
+        size   = base_font_size, hjust  = 0.5,
+        margin = ggplot2::margin(b = title_gap)       
+      ),
+      legend.text = ggplot2::element_text(size = base_font_size),
+      legend.background = ggplot2::element_rect(fill = "white", color = "lightgrey", linewidth = 0.4),
+      legend.box.background = ggplot2::element_blank(),
+      legend.margin = ggplot2::margin(4, 6, 4, 6),
+      legend.box.margin = ggplot2::margin(0, 0, 0, 0)
+    )
+}
+
+p_caf_1 = plot_caf(
+  caf_results_1,
+  condition_levels = c("acc", "implicitDeadline", "explicitDeadline"),
+  condition_labels = c("Accuracy", "Implicit Deadline", "Explicit Deadline"),
+  condition_cols   = c("#6B6B6B", "#6A33A2", "#008080"),
+  xlim_up = 1000
+)
+
+p_caf_2 = plot_caf(
+  caf_results_2,
+  condition_levels = c("control", "explicitDeadline"),
+  condition_labels = c("Control", "Explicit Deadline"),
+  condition_cols   = c("#6B6B6B", "#008080"),
+  xlim_up = 1000
+)
+
+fig_d1 = p_caf_1 + p_caf_2 +
+  patchwork::plot_layout(guides = "keep") &
+  ggplot2::theme(
+    plot.margin = ggplot2::margin(t = 10, r = 5, b = 5, l = 5)
+  )
+
+fig_d1
+
+ggplot2::ggsave(plot = fig_d1,
+  filename = "Figure_D1_screening.png",
+  device = ragg::agg_png,
+  path = paste0(root_path, "/4_R_script/"),
+  width = 16, height = 9, units = "cm", dpi = 300
+)
+```
+
+## Empirical boundaries
+
+```{r caf_thresholds}
+caf_results = dplyr::bind_rows(caf_results_1, caf_results_2)
+
+calc_caf_threshold(caf_results) %>%
+  dplyr::mutate(
+    mean_rt = round(mean_rt, 0),
+    acc = round(acc, 2),
+    ci_low  = round(ci_low, 2),
+    ci_high = round(ci_high, 2)
+  )
+
+rt_thresholds_study = calc_caf_threshold(caf_results) %>%
+  dplyr::select(study_label, condition, rt_cutoff = mean_rt)
+
+empirical_thresholds = rt_thresholds_study %>%
+  dplyr::transmute(study_label, condition,
+                   empirical_threshold_ms = rt_cutoff)
+```
+
+## Fast-response prevalence 
+
+```{r fixed_prevalence}
+df_all_studies %>%
+  dplyr::group_by(study_label, condition) %>%
+  dplyr::summarise(
+    n_total       = dplyr::n(),
+    n_below_300   = sum(rt_ms < 300),
+    pct_below_300 = round(mean(rt_ms < 300) * 100, 2),
+    acc_below_300 = round(mean(correct[rt_ms < 300], na.rm = TRUE), 3),
+    .groups = "drop"
+  )
+```
+
+```{r empirical_prevalence}
+calc_trial_proportions = function(df, thresholds) {
+  df %>%
+    dplyr::left_join(thresholds, by = c("study_label", "condition")) %>%
+    dplyr::group_by(study_label, condition) %>%
+    dplyr::summarise(
+      n_total = dplyr::n(),
+      n_below_empirical = sum(rt_ms < unique(empirical_threshold_ms)),
+      pct_below_empirical = mean(rt_ms < unique(empirical_threshold_ms)) * 100,
+      .groups = "drop"
+    )
+}
+
+trial_proportions = calc_trial_proportions(df_all_studies, empirical_thresholds)
+trial_proportions %>%
+  dplyr::mutate(across(tidyselect::starts_with("pct_"), ~ round(.x, 2)))
+```
+
+## Accuracy below the empirical boundary 
+
+```{r empirical_accuracy}
+fastregion_acc = df_all_studies %>%
+  dplyr::left_join(empirical_thresholds, by = c("study_label", "condition")) %>%
+  dplyr::filter(rt_ms < empirical_threshold_ms) %>%
+  dplyr::group_by(study_label, condition) %>%
+  dplyr::summarise(
+    n_below = dplyr::n(),
+    n_correct = sum(correct),
+    acc_below = mean(correct),
+    .groups = "drop"
+  ) %>%
+  dplyr::rowwise() %>%
+  dplyr::mutate(
+    ci_low = binom.test(n_correct, n_below)$conf.int[1],
+    ci_high = binom.test(n_correct, n_below)$conf.int[2]
+  ) %>%
+  dplyr::ungroup() %>%
+  dplyr::mutate(across(c(acc_below, ci_low, ci_high), ~ round(.x, 3)))
+fastregion_acc
+
+df_all_studies %>%
+  dplyr::left_join(empirical_thresholds, by = c("study_label", "condition")) %>%
+  dplyr::filter(rt_ms < empirical_threshold_ms) %>%
+  dplyr::group_by(study_label, participant, condition) %>%
+  dplyr::summarise(acc = mean(correct, na.rm = TRUE),
+                   n = dplyr::n(), .groups = "drop") %>%
+  dplyr::filter(n >= 10) %>%
+  dplyr::group_by(study_label, condition) %>%
+  dplyr::summarise(
+    n_subj = dplyr::n(),
+    mean_acc = round(mean(acc), 3),
+    ci_low = round(mean(acc) - 1.96 * sd(acc) / sqrt(dplyr::n()), 3),
+    ci_high  = round(mean(acc) + 1.96 * sd(acc) / sqrt(dplyr::n()), 3),
+    .groups = "drop"
+  )
+```
+
+## Accuracy below the fixed 300-ms cutoff 
+
+```{r fixed_cutoff_test}
+df_all_studies %>%
+  dplyr::filter(rt_ms < my_cutoff_ms) %>%
+  dplyr::group_by(study_label, participant, condition) %>%
+  dplyr::summarise(acc = mean(correct, na.rm = TRUE),
+                   n = dplyr::n(), .groups = "drop") %>%
+  dplyr::filter(n >= 10) %>%
+  dplyr::group_by(study_label, condition) %>%
+  dplyr::summarise(
+    n_subj = dplyr::n(),
+    mean_acc = round(mean(acc), 3),
+    t = round(t.test(acc, mu = 0.5)$statistic, 3),
+    p = round(t.test(acc, mu = 0.5)$p.value, 3),
+    cohens_d = round(effectsize::cohens_d(acc, mu = 0.5)$Cohens_d, 3),
+    BF01 = round(bf_one_sample(acc, mu = 0.5, bf = "01"), 3),
+    BF10 = round(bf_one_sample(acc, mu = 0.5, bf = "10"), 3),
+    .groups  = "drop"
+  )
+```
+
+## Participant spread in the candidate region
+
+```{r participant_spread}
+condition_totals = df_all_studies %>%
+  dplyr::distinct(study_label, condition, participant) %>%
+  dplyr::count(study_label, condition, name = "n_participants_total")
+
+df_all_studies %>%
+  dplyr::left_join(empirical_thresholds, by = c("study_label", "condition")) %>%
+  dplyr::filter(rt_ms < empirical_threshold_ms) %>%
+  dplyr::count(study_label, condition, participant, name = "n_fast") %>%
+  dplyr::group_by(study_label, condition) %>%
+  dplyr::summarise(
+    n_with_fast = dplyr::n(), # participants with >=1 fast trial
+    median_per_pp = median(n_fast),
+    q25_per_pp = quantile(n_fast, 0.25),
+    q75_per_pp = quantile(n_fast, 0.75),
+    max_per_pp = max(n_fast),
+    .groups = "drop"
+  ) %>%
+  dplyr::left_join(condition_totals, by = c("study_label", "condition")) %>%
+  dplyr::mutate(pct_with_fast = round(100 * n_with_fast / n_participants_total, 1)) %>%
+  dplyr::relocate(n_participants_total, .after = n_with_fast)
+```
+
+## Bimodality: Hartigan's dip test
+
+```{r dip_test}
+calc_dip_results = function(df) {
+  df %>%
+    dplyr::filter(correct == 1) %>%
+    dplyr::group_by(study_label, participant, condition) %>%
+    dplyr::summarise(
+      dip_p = dip.test(rt_ms)$p.value,
+      n_trials = n(),
+      .groups = "drop"
+    )
+}
+
+summarise_dip_by_condition = function(dip_results, min_trials = 10) {
+  dip_results %>%
+    dplyr::filter(n_trials >= min_trials) %>%
+    dplyr::group_by(study_label, condition) %>%
+    dplyr::summarise(
+      n_subj = n(),
+      n_significant = sum(dip_p < .05),
+      pct_significant = mean(dip_p < .05) * 100,
+      .groups = "drop"
+    )
+}
+
+summarise_dip_overall = function(dip_results, min_trials = 10) {
+  dip_results %>%
+    dplyr::filter(n_trials >= min_trials) %>%
+    dplyr::group_by(study_label) %>%
+    dplyr::summarise(
+      n_subj = n(),
+      n_significant = sum(dip_p < .05),
+      pct_significant = mean(dip_p < .05) * 100,
+      .groups = "drop"
+    )
+}
+
+dip_results = calc_dip_results(df_all_studies)
+
+summarise_dip_by_condition(dip_results) %>%
+  dplyr::mutate(pct_significant = round(pct_significant, 2))
+summarise_dip_overall(dip_results) %>%
+  dplyr::mutate(pct_significant = round(pct_significant, 2))
+```
+
+# Cross-validation: Rafiei and Rahnev (2021)
+
+```{r rr_load, message = FALSE, warning = FALSE}
+local_rr_data_path = "C:/Users/Administrator/Downloads/data.xlsx"
+rr_data_url = "https://osf.io/nzx7a/download"
+
+rr_data_path = if (file.exists(local_rr_data_path)) {
+  local_rr_data_path
+} else {
+  tmp = tempfile(fileext = ".xlsx")
+  download.file(rr_data_url, tmp, mode = "wb")
+  tmp
+}
+
+df_rr = readxl::read_excel(rr_data_path, sheet = 2) %>%
+ rename(participant = Subject, correct = Accuracy) %>%
+  dplyr::mutate(rt_ms = RT * 1000, condition = factor(SAT, levels = 1:5, labels = c("extremely_fast", "fast", "medium", "slow", "extremely_slow")))
+```
+
+## Sanity check
+
+```{r rr_sanity}
+df_rr %>%
+  dplyr::group_by(condition) %>%
+  dplyr::summarise(
+    n_subj = n_distinct(participant),
+    n_trials = n(),
+    mean_acc = round(mean(correct), 3),
+    median_rt = round(median(rt_ms), 1)
+  ) 
+```
+
+## Conditional accuracy functions
+
+```{r rr_caf, fig.width = 7, fig.height = 4.2}
+caf_rr = df_rr %>%
+  dplyr::mutate(study_label = "Rafiei & Rahnev", procedural_cutoff_ms = NA_real_) %>%
+  calc_caf(binwidth = my_caf_binwidth, min_n = 20)
+
+ggplot(caf_rr, aes(x = mean_rt, y = acc, color = condition, fill = condition)) +
+  geom_ribbon(aes(ymin = ci_low, ymax = ci_high), alpha = 0.15, color = NA) +
+  geom_point(size = 1.5) +
+  geom_line(linewidth = 0.7) +
+  geom_hline(yintercept = 0.5, linetype = "dashed") +
+  geom_vline(xintercept = 300, linetype = "dotted") +
+  coord_cartesian(xlim = c(0, 800), ylim = c(0, 1)) +
+  labs(
+    x = "Response Time Bin (ms)",
+    y = "Proportion Correct",
+    color = "SAT condition",
+    fill = "SAT condition"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "top")
+```
+
+## Empirical boundaries
+
+```{r rr_caf_threshold}
+caf_rr %>%
+  dplyr::group_by(condition) %>%
+  dplyr::filter(above_chance) %>%
+  dplyr::slice_min(mean_rt, n = 1) %>%
+  dplyr::select(condition, mean_rt, n, acc, ci_low, ci_high) %>%
+  dplyr::mutate(
+    mean_rt = round(mean_rt, 1),
+    acc = round(acc, 3),
+    ci_low = round(ci_low, 3),
+    ci_high = round(ci_high, 3)
+  )
+```
+
+## Fast-response prevalence 
+
+```{r rr_prevalence}
+df_rr %>%
+  dplyr::group_by(condition) %>%
+  dplyr::summarise(
+    n_total = n(),
+    n_below_300 = sum(rt_ms < 300),
+    pct_below_300 = round(mean(rt_ms < 300) * 100, 2),
+    acc_below_300 = round(mean(correct[rt_ms < 300], na.rm = TRUE), 3),
+    .groups = "drop"
+  ) 
+
+rt_thresholds = caf_rr %>%
+  dplyr::group_by(condition) %>%
+  dplyr::filter(above_chance) %>%
+  dplyr::slice_min(mean_rt, n = 1, with_ties = FALSE) %>%
+  dplyr::ungroup() %>%
+  dplyr::select(condition, rt_cutoff = mean_rt)
+
+df_rr %>%
+  dplyr::left_join(rt_thresholds, by = "condition") %>%
+  dplyr::group_by(condition, rt_cutoff) %>%
+  dplyr::summarise(
+    n_total = n(),
+    n_below_cutoff = sum(rt_ms < rt_cutoff, na.rm = TRUE),
+    pct_below_cutoff = round(mean(rt_ms < rt_cutoff, na.rm = TRUE) * 100, 2),
+    acc_below_cutoff = round(mean(correct[rt_ms < rt_cutoff], na.rm = TRUE), 3),
+    .groups = "drop"
+  ) %>%
+  dplyr::mutate(rt_cutoff = round(rt_cutoff, 1))
+```
+
+## Reproduction of Ratcliff and Kang (2021)
+
+```{r rr_rk_reproduction}
+rk_base = df_rr %>% dplyr::filter(condition == "extremely_fast")
+
+dplyr::bind_rows(
+  rk_base %>% dplyr::mutate(set = "all responses"),
+  rk_base %>% dplyr::filter(rt_ms < 300) %>% dplyr::mutate(set = "RT < 300 ms")) %>%
+  dplyr::group_by(set, participant) %>%
+  dplyr::summarise(acc = mean(correct), .groups = "drop") %>%
+  dplyr::group_by(set) %>%
+  dplyr::summarise(
+    n_subj = dplyr::n(),
+    mean_acc = round(mean(acc), 3),
+    t = round(t.test(acc, mu = 0.5)$statistic, 3),
+    df = t.test(acc, mu = 0.5)$parameter,
+    p = round(t.test(acc, mu = 0.5)$p.value, 4),
+    cohens_d = round(effectsize::cohens_d(acc, mu = 0.5)$Cohens_d, 3),
+    BF01 = round(bf_one_sample(acc, mu = 0.5, bf = "01"), 3),
+    BF10 = round(bf_one_sample(acc, mu = 0.5, bf = "10"), 3),
+    .groups  = "drop"
+  )
+```
+
+## Reproduction check
+
+```{r rk_reproduction_check}
+rk_repro_check = function(lower_ms, higher_ms) {
+  base = df_rr %>% dplyr::filter(condition == "extremely_fast", rt_ms > lower_ms, rt_ms < higher_ms)
+  
+  subj_acc = function(d) {
+    d %>%
+      dplyr::group_by(participant) %>%
+      dplyr::summarise(acc = mean(correct), .groups = "drop") %>%
+      dplyr::pull(acc)
+  }
+  
+  all_acc  = subj_acc(base)
+  fast_acc = subj_acc(dplyr::filter(base, rt_ms < 300))
+  
+  tibble::tibble(
+    lower_ms = lower_ms,
+    higher_ms = higher_ms,
+    set = c("all responses", "RT < 300 ms"),
+    n_subj = c(length(all_acc), length(fast_acc)),
+    mean_acc = round(c(mean(all_acc), mean(fast_acc)), 3),
+    t = round(c(t.test(all_acc,  mu = .5)$statistic,
+                t.test(fast_acc, mu = .5)$statistic), 3),
+    df = c(t.test(all_acc, mu = .5)$parameter,
+           t.test(fast_acc, mu = .5)$parameter),
+    p = round(c(t.test(all_acc,  mu = .5)$p.value,
+                t.test(fast_acc, mu = .5)$p.value), 4)
+  )
+}
+
+cutoffs = tidyr::crossing(lower_ms = c(0, 150), higher_ms = c(999999, 1500))
+
+cutoffs %>%
+  purrr::pmap_dfr(function(lower_ms, higher_ms) {
+    rk_repro_check(lower_ms = lower_ms, higher_ms = higher_ms)
+  })
+```
+
+## Accuracy below the fixed 300-ms cutoff
+
+```{r rr_fixed_cutoff_test}
+df_rr %>%
+  dplyr::filter(rt_ms < my_cutoff_ms) %>%
+  dplyr::group_by(condition, participant) %>%
+  dplyr::summarise(acc = mean(correct, na.rm = TRUE),
+                   n = dplyr::n(), .groups = "drop") %>%
+  dplyr::filter(n >= 10) %>%
+  dplyr::group_by(condition) %>%
+  dplyr::summarise(
+    n_subj = dplyr::n(),
+    mean_acc = round(mean(acc), 3),
+    t = ifelse(dplyr::n() >= 2, round(t.test(acc, mu = 0.5)$statistic, 3), NA_real_),
+    p = ifelse(dplyr::n() >= 2, round(t.test(acc, mu = 0.5)$p.value, 3), NA_real_),
+    cohens_d = ifelse(dplyr::n() >= 2, round(effectsize::cohens_d(acc, mu = 0.5)$Cohens_d, 3), NA_real_),
+    BF01 = round(bf_one_sample(acc, mu = 0.5, bf = "01"), 3),
+    BF10 = round(bf_one_sample(acc, mu = 0.5, bf = "10"), 3),
+    .groups = "drop"
+  )
+```
+
+## Accuracy below the empirical boundary
+
+```{r rr_empirical_accuracy}
+df_rr %>%
+  dplyr::left_join(rt_thresholds, by = "condition") %>%
+  dplyr::filter(rt_ms < rt_cutoff) %>%
+  dplyr::group_by(participant, condition) %>%
+  dplyr::summarise(acc = mean(correct, na.rm = TRUE), n = n(), .groups = "drop") %>%
+  dplyr::filter(n >= 10) %>%
+  dplyr::group_by(condition) %>%
+  dplyr::summarise(
+    n_subj = n(),
+    mean_acc = round(mean(acc, na.rm = TRUE), 3),
+    ci_low = round(mean(acc) - 1.96 * sd(acc) / sqrt(n()), 3),
+    ci_high = round(mean(acc) + 1.96 * sd(acc) / sqrt(n()), 3),
+    .groups = "drop"
+  )
+```
+
+## Bimodality: Hartigan's dip test
+
+```{r rr_dip}
+dip_rr = df_rr %>%
+  dplyr::filter(correct == 1) %>%
+  dplyr::group_by(participant, condition) %>%
+  dplyr::summarise(dip_p = dip.test(rt_ms)$p.value, n_trials = n(), .groups  = "drop")
+
+dip_rr %>%
+  dplyr::filter(n_trials >= 10) %>%  
+  dplyr::group_by(condition) %>%
+  dplyr::summarise(n_subj = n(), n_significant = sum(dip_p < .05), pct_significant = round(mean(dip_p < .05) * 100, 2), .groups = "drop")
+```
