@@ -1,0 +1,27 @@
+Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+Copyright (c) 2026 Julia V. Liss, Mischa von Krause, Lasse Elsemüller,
+Eva Marie Hunsmann, and Veronika Lerche
+
+This license applies to the non-software content of this repository, namely:
+
+  - behavioral data files (3_simulators/data/, including individual_data/
+    and individual_data_s2/)
+  - codebooks (ttj_raw_data_variables_explained.xlsx,
+    ttj_s2_raw_data_variables_explained.xlsx)
+  - model estimates (estimates_model_comp/, estimates_param_estim/)
+  - trained network checkpoints (checkpoint_ttj_*)
+  - figures and generated images
+
+Software in this repository is licensed separately under the MIT License;
+see LICENSE.
+
+Full license text: https://creativecommons.org/licenses/by/4.0/legalcode
+Summary: https://creativecommons.org/licenses/by/4.0/
+
+Suggested attribution:
+
+  Liss, J. V., von Krause, M., Elsemüller, L., Hunsmann, E. M., & Lerche, V.
+  (2026). Time to jump: Exploring the distribution of noise in evidence
+  accumulation as a function of time pressure. Cognitive Psychology, 167,
+  Article 101836. https://doi.org/10.1016/j.cogpsych.2026.101836
