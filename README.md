@@ -104,11 +104,12 @@ Study 2 files typically use the affix `_s2` (or are located in `s2_*` folders), 
 
 ## Licenses
 
-Software in this repository—including the analysis scripts, simulators, and experiment scripts in `2_experiment_script/`, `3_simulators/`, and `4_R_script/`—is released under the [MIT License](https://opensource.org/licenses/MIT) (see `LICENSE`).
+Software in this repository—including the analysis scripts, simulators, and experiment scripts in `2_experiment_script/`, `3_simulators/`, and `4_R_script/`—is released under the [MIT License](https://opensource.org/licenses/MIT) (see `LICENSE`), with one exception:
+`levy_noise.pyx` is derived from the [GNU Scientific Library](https://www.gnu.org/software/gsl/) and is licensed under the [GNU General Public License, Version 3 or later](https://www.gnu.org/licenses/gpl-3.0.html) (see `3_simulators/LICENSE_GPL` and the file header); all other software files remain under the MIT License.
 
 Data, codebooks, model estimates, network checkpoints, and figures are released under the [Creative Commons Attribution 4.0 International License (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/) (see `LICENSE_DATA`).
 
-Third-party dependencies and frameworks (lab.js, PsychoPy, BayesFlow, and others) remain subject to their own licenses.
+Third-party dependencies and frameworks (e.g., BayesFlow, lab.js, PsychoPy) remain subject to their own licenses.
 
 ---
 
@@ -128,7 +129,7 @@ If you use (parts of) this repository, please cite the associated article.
 }
 ```
 
-Please also consider citing the relevant tools and frameworks:
+Please also consider citing the relevant tools and frameworks, such as
 
 - Henninger, F., Shevchenko, Y., Mertens, U. K., Kieslich, P. J., & Hilbig, B. E. (2021). Lab.js: A free, open, online study builder. *Behavior Research Methods*, *54*(2), 556–573. https://doi.org/10.3758/s13428-019-01283-5
 - Peirce, J., Gray, J. R., Simpson, S., MacAskill, M., Höchenberger, R., Sogo, H., Kastman, E., & Lindeløv, J. K. (2019). PsychoPy2: Experiments in behavior made easy. *Behavior Research Methods*, *51*(1), 195–203. https://doi.org/10.3758/s13428-018-01193-y
