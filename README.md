@@ -134,5 +134,3 @@ Please also consider citing the relevant tools and frameworks:
 - Peirce, J., Gray, J. R., Simpson, S., MacAskill, M., Höchenberger, R., Sogo, H., Kastman, E., & Lindeløv, J. K. (2019). PsychoPy2: Experiments in behavior made easy. *Behavior Research Methods*, *51*(1), 195–203. https://doi.org/10.3758/s13428-018-01193-y
 - Radev, S. T., Mertens, U. K., Voss, A., Ardizzone, L., & Köthe, U. (2022). BayesFlow: Learning complex stochastic models with invertible neural networks. *IEEE Transactions on Neural Networks and Learning Systems*, *33*(4), 1452–1466. https://doi.org/10.1109/TNNLS.2020.3042395
 - Radev, S. T., Schmitt, M., Schumacher, L., Elsemüller, L., Pratz, V., Schälte, Y., Köthe, U., & Bürkner, P.-C. (2023). *BayesFlow: Amortized Bayesian workflows with neural networks*. arXiv. https://doi.org/10.48550/arXiv.2306.16015
-
----
