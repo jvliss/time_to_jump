@@ -117,14 +117,14 @@ Third-party dependencies and frameworks (lab.js, PsychoPy, BayesFlow, and others
 If you use (parts of) this repository, please cite the associated article.
 
 ```bibtex
-@article{LISS2026101836,
-  title   = {Time to jump: Exploring the distribution of noise in evidence accumulation as a function of time pressure},
+@article{liss2026ttj,
+  title = {Time to jump: Exploring the distribution of noise in evidence accumulation as a function of time pressure},
+  author = {Liss, Julia V. and von Krause, Mischa and Elsemüller, Lasse and Hunsmann, Eva Marie and Lerche, Veronika},
   journal = {Cognitive Psychology},
-  volume  = {167},
-  pages   = {101836},
-  year    = {2026},
-  doi     = {https://doi.org/10.1016/j.cogpsych.2026.101836},
-  author  = {Julia V. Liss and Mischa {von Krause} and Lasse Elsemüller and Eva Marie Hunsmann and Veronika Lerche}
+  volume = {167},
+  pages = {Article 101836},
+  year = {2026},
+  doi = {10.1016/j.cogpsych.2026.101836}
 }
 ```
 
