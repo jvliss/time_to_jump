@@ -13,8 +13,8 @@ This license applies to the non-software content of this repository, namely:
   - trained network checkpoints (checkpoint_ttj_*)
   - figures and generated images
 
-Software in this repository is licensed separately under the MIT License;
-see LICENSE.
+Software in this repository is licensed separately (see LICENSE and the
+README for details).
 
 Full license text: https://creativecommons.org/licenses/by/4.0/legalcode
 Summary: https://creativecommons.org/licenses/by/4.0/
