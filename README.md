@@ -104,8 +104,10 @@ Study 2 files typically use the affix `_s2` (or are located in `s2_*` folders), 
 
 ## Licenses
 
-Software in this repository—including the analysis scripts, simulators, and experiment scripts in `2_experiment_script/`, `3_simulators/`, and `4_R_script/`—is released under the [MIT License](https://opensource.org/licenses/MIT) (see `LICENSE`), with one exception:
-`levy_noise.pyx` is derived from the [GNU Scientific Library](https://www.gnu.org/software/gsl/) and is licensed under the [GNU General Public License, Version 3 or later](https://www.gnu.org/licenses/gpl-3.0.html) (see `3_simulators/LICENSE_GPL` and the file header); all other software files remain under the MIT License.
+Software in this repository—including the analysis scripts, simulators, and experiment scripts in `2_experiment_script/`, `3_simulators/`, and `4_R_script/`—is released under the [MIT License](https://opensource.org/licenses/MIT) (see `LICENSE`), with two exceptions:
+
+- `3_simulators/levy_noise.pyx` is derived from the [GNU Scientific Library](https://www.gnu.org/software/gsl/) and is licensed under the [GNU General Public License, version 3 or later](https://www.gnu.org/licenses/gpl-3.0.html) (see `3_simulators/LICENSE_GPL` and the file header).
+- The screen-scaling routine in `2_experiment_script/s2_psychopy/` is adapted from [Morys-Carter (2021)](https://pavlovia.org/Wake/screenscale) and is not covered by this repository's MIT License; it remains subject to its original terms.
 
 Data, codebooks, model estimates, network checkpoints, and figures are released under the [Creative Commons Attribution 4.0 International License (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/) (see `LICENSE_DATA`).
 
